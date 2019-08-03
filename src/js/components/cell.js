@@ -87,8 +87,6 @@ class Cell extends Component {
         const toggleShowCorrectAnswerChanged = this.props.letter !== null && this.props.toggleShowCorrectAnswer !== nextProps.toggleShowCorrectAnswer;
         const validateChanged = this.props.letter !== null && this.props.validate !== nextProps.validate;
 
-        // console.log('Cell::shouldComponentUpdate', phaseChanged, toggleShowCorrectAnswerChanged, validateChanged, nextProps, nextState);
-
         return phaseChanged || toggleShowCorrectAnswerChanged || validateChanged;
     }
 

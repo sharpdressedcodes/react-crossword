@@ -61,11 +61,8 @@ class Grid extends Component {
         const rowsChanged = nextState.rows !== this.state.rows;
         const currentPositionChanged = nextProps.currentPosition !== this.props.currentPosition;
         const validateChanged = nextProps.validate !== this.props.validate;
-        // const getTypedWordFromPositionChanged = nextProps.getTypedWordFromPosition !== this.props.getTypedWordFromPosition;
 
-        // console.log('Grid::shouldComponentUpdate::currentPositionChanged', currentPositionChanged);
-
-        return wordsChanged || rowsChanged || currentPositionChanged || validateChanged; // || getTypedWordFromPositionChanged;
+        return wordsChanged || rowsChanged || currentPositionChanged || validateChanged;
     }
 
     componentWillReceiveProps(nextProps) {
@@ -97,7 +94,6 @@ class Grid extends Component {
                                 letter: word.word.substr(index, 1),
                                 wordIndex: i // + 1
                             };
-                            // result = word.word.substr(x - word.startX, 1);
                             if (x === word.endX) {
                                 word.rendered = true;
                             }
@@ -112,7 +108,6 @@ class Grid extends Component {
                                 letter: word.word.substr(index, 1),
                                 wordIndex: i // + 1
                             };
-                            // result = word.word.substr(y - word.startY, 1);
                             if (y === word.endY) {
                                 word.rendered = true;
                             }
