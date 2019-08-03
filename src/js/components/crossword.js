@@ -8,9 +8,8 @@ import { toggleShowCorrectAnswer, validateCells } from '../actions/crossword';
 class Crossword extends Component {
     static displayName = 'Crossword';
 
-    static MAX_WIDTH = 15;
+    static MAX_WIDTH = 15; // cells
 
-    // cells
     static MAX_HEIGHT = 15; // cells
 
     static propTypes = {
