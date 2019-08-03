@@ -7,7 +7,7 @@ class ToggleButton extends Component {
 
     static propTypes = {
         on: PropTypes.shape(Object.assign({}, Button.propTypes)),
-        off: PropTypes.shape(Object.assign({}, Button.propTypes)),
+        off: PropTypes.shape(Object.assign({}, Button.propTypes))
     };
 
     static defaultProps = {
@@ -41,11 +41,11 @@ class ToggleButton extends Component {
         return toggledChanged;
     }
 
-    clickHandler = (event) => {
+    clickHandler = event => {
         const { toggled } = this.state;
         const handler = toggled ? this.props.off.clickHandler : this.props.on.clickHandler;
 
-        this.setState({toggled: !toggled});
+        this.setState({ toggled: !toggled });
         handler.call(this, event);
     };
 

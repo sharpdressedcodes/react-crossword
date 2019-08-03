@@ -7,6 +7,7 @@ class Cell extends Component {
     static displayName = 'Cell';
 
     static LETTER_DEFAULT = '+';
+
     static LETTER_ACTIVE = '-';
 
     static propTypes = {
@@ -44,29 +45,24 @@ class Cell extends Component {
         this.prevState = this.state;
     }
 
-    onCellClick = (event) => {
-        this.setState({phase: 'input'});
+    onCellClick = event => {
+        this.setState({ phase: 'input' });
         this.context.executeAction(cellClicked, { position: this.props.position });
     };
 
-    onInput = (event) => {
-
+    onInput = event => {
         if (this.input.value && /^[a-zA-Z]$/.test(this.input.value)) {
-
             this.input.value = this.input.value.toUpperCase();
-            this.setState({typedLetter: this.input.value});
+            this.setState({ typedLetter: this.input.value });
             this.context.executeAction(cellTyped, { position: this.props.position, letter: this.input.value });
-
         } else {
-
             this.input.value = '';
-            this.setState({typedLetter: null});
+            this.setState({ typedLetter: null });
             this.context.executeAction(cellTyped, { position: this.props.position, letter: null });
         }
     };
 
     componentWillReceiveProps(nextProps) {
-
         if (nextProps.toggleShowCorrectAnswer !== this.props.toggleShowCorrectAnswer) {
             if (nextProps.toggleShowCorrectAnswer) {
                 this.prevState = this.state;
@@ -91,20 +87,28 @@ class Cell extends Component {
         const toggleShowCorrectAnswerChanged = this.props.letter !== null && this.props.toggleShowCorrectAnswer !== nextProps.toggleShowCorrectAnswer;
         const validateChanged = this.props.letter !== null && this.props.validate !== nextProps.validate;
 
-        //console.log('Cell::shouldComponentUpdate', phaseChanged, toggleShowCorrectAnswerChanged, validateChanged, nextProps, nextState);
+        // console.log('Cell::shouldComponentUpdate', phaseChanged, toggleShowCorrectAnswerChanged, validateChanged, nextProps, nextState);
 
         return phaseChanged || toggleShowCorrectAnswerChanged || validateChanged;
     }
 
+    componentDidUpdate(prevProps) {
+        if (this.state.phase === 'input') {
+            this.input.focus();
+        }
+    }
+
     determineAndSetPhase = () => {
-        this.setState({ phase: this.state.typedLetter === null ? 'start' : 'filled' });
+        const phase = this.state.typedLetter === null ? 'start' : 'filled';
+        this.setState(prevState => ({ phase }));
     };
 
     render() {
         const { phase, typedLetter } = this.state;
         const letter = this.props.letter === null ? Cell.LETTER_DEFAULT : Cell.LETTER_ACTIVE;
         const clickHandler = this.props.letter === null ? null : this.onCellClick;
-        const style = {cursor: 'default', display: 'inline-block', width: '25px', textAlign: 'center'};
+        const style = { cursor: 'default', display: 'inline-block', width: '25px', textAlign: 'center' };
+        const className = typedLetter !== null && typedLetter === this.props.letter ? 'valid' : 'invalid';
         let indicator = null;
         let el = null;
 
@@ -114,47 +118,66 @@ class Cell extends Component {
 
         switch (phase) {
             case 'start':
-                el = <span onClick={clickHandler} style={style}>{letter}</span>;
+                el = (
+                    <span onClick={clickHandler} style={style}>
+                        {letter}
+                    </span>
+                );
                 break;
 
             case 'input':
                 el = (
                     <input
-                        autoFocus
                         type="text"
                         onBlur={this.determineAndSetPhase}
                         onChange={this.onInput}
-                        style={{width: '25px', textAlign: 'center', border: 'none'}}
+                        style={{ width: '25px', textAlign: 'center', border: 'none' }}
                         pattern="^[a-zA-Z]{1}$"
-                        ref={c => {this.input = c;}}
+                        ref={c => {
+                            this.input = c;
+                        }}
                         maxLength="1"
                     />
                 );
                 break;
 
             case 'filled':
-                el = <span onClick={clickHandler} style={style}>{typedLetter}</span>;
+                el = (
+                    <span onClick={clickHandler} style={style}>
+                        {typedLetter}
+                    </span>
+                );
                 break;
 
             case 'show':
-                el = <span onClick={clickHandler} style={style}>{this.props.letter || Cell.LETTER_DEFAULT}</span>;
+                el = (
+                    <span onClick={clickHandler} style={style}>
+                        {this.props.letter || Cell.LETTER_DEFAULT}
+                    </span>
+                );
                 break;
 
+            default:
             case 'validate':
-                const className = typedLetter !== null && typedLetter === this.props.letter ? 'valid' : 'invalid';
-                style.outline = '1px solid ' + (className === 'valid' ? 'green' : 'red');
-                el = <span className={className} onClick={clickHandler} style={style}>{typedLetter || Cell.LETTER_ACTIVE}</span>;
+                style.outline = `1px solid ${className === 'valid' ? 'green' : 'red'}`;
+                el = (
+                    <span className={className} onClick={clickHandler} style={style}>
+                        {typedLetter || Cell.LETTER_ACTIVE}
+                    </span>
+                );
                 break;
         }
 
         if (this.props.letterIndex === 0) {
-            indicator = <span style={{position: 'absolute', fontSize: '70%', color: 'lightgrey', pointerEvents: 'none'}}>{this.props.indicator}</span>
+            indicator = (
+                <span style={{ position: 'absolute', fontSize: '70%', color: 'lightgrey', pointerEvents: 'none' }}>{this.props.indicator}</span>
+            );
         }
 
-        //console.log('Cell::render', 'phase=', phase);
+        // console.log('Cell::render', 'phase=', phase);
 
         return (
-            <div className="cell" style={{width: '25px'}}>
+            <div className="cell" style={{ width: '25px' }}>
                 {indicator}
                 {el}
             </div>

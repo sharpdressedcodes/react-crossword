@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
 class Row extends Component {
-
     static displayName = 'Row';
 
     static propTypes = {
@@ -12,11 +11,15 @@ class Row extends Component {
     render() {
         const { cells } = this.props;
         const style = {
-            display: 'flex',
-            //justifyContent: 'space-evenly'
+            display: 'flex'
+            // justifyContent: 'space-evenly'
         };
 
-        return <section className="row" style={style}>{cells}</section>;
+        return (
+            <section className="row" style={style}>
+                {cells}
+            </section>
+        );
     }
 }
 

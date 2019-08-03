@@ -9,13 +9,15 @@ class Grid extends Component {
     static displayName = 'Grid';
 
     static propTypes = {
-        words: PropTypes.arrayOf(PropTypes.shape({
-            word: PropTypes.string.isRequired,
-            startX: PropTypes.number.isRequired,
-            startY: PropTypes.number.isRequired,
-            endX: PropTypes.number.isRequired,
-            endY: PropTypes.number.isRequired,
-        })).isRequired,
+        words: PropTypes.arrayOf(
+            PropTypes.shape({
+                word: PropTypes.string.isRequired,
+                startX: PropTypes.number.isRequired,
+                startY: PropTypes.number.isRequired,
+                endX: PropTypes.number.isRequired,
+                endY: PropTypes.number.isRequired
+            })
+        ).isRequired,
         maxWidth: PropTypes.number.isRequired,
         maxHeight: PropTypes.number.isRequired,
         currentPosition: PropTypes.shape({
@@ -23,14 +25,16 @@ class Grid extends Component {
             y: PropTypes.number.isRequired
         }),
         validate: PropTypes.bool,
-        typedLetters: PropTypes.arrayOf(PropTypes.shape({
-            position: PropTypes.shape({
-                x: PropTypes.number.isRequired,
-                y: PropTypes.number.isRequired
-            }).isRequired,
-            letter: PropTypes.string.isRequired,
-            indicator: PropTypes.number.isRequired
-        }))
+        typedLetters: PropTypes.arrayOf(
+            PropTypes.shape({
+                position: PropTypes.shape({
+                    x: PropTypes.number.isRequired,
+                    y: PropTypes.number.isRequired
+                }).isRequired,
+                letter: PropTypes.string.isRequired,
+                indicator: PropTypes.number.isRequired
+            })
+        )
     };
 
     static defaultProps = {
@@ -57,15 +61,14 @@ class Grid extends Component {
         const rowsChanged = nextState.rows !== this.state.rows;
         const currentPositionChanged = nextProps.currentPosition !== this.props.currentPosition;
         const validateChanged = nextProps.validate !== this.props.validate;
-        //const getTypedWordFromPositionChanged = nextProps.getTypedWordFromPosition !== this.props.getTypedWordFromPosition;
+        // const getTypedWordFromPositionChanged = nextProps.getTypedWordFromPosition !== this.props.getTypedWordFromPosition;
 
-        //console.log('Grid::shouldComponentUpdate::currentPositionChanged', currentPositionChanged);
+        // console.log('Grid::shouldComponentUpdate::currentPositionChanged', currentPositionChanged);
 
-        return wordsChanged || rowsChanged || currentPositionChanged || validateChanged;// || getTypedWordFromPositionChanged;
+        return wordsChanged || rowsChanged || currentPositionChanged || validateChanged; // || getTypedWordFromPositionChanged;
     }
 
     componentWillReceiveProps(nextProps) {
-
         if (!this.props.validate && nextProps.validate !== this.props.validate) {
             this.validateWords();
         }
@@ -92,9 +95,9 @@ class Grid extends Component {
                             result = {
                                 index,
                                 letter: word.word.substr(index, 1),
-                                wordIndex: i// + 1
+                                wordIndex: i // + 1
                             };
-                            //result = word.word.substr(x - word.startX, 1);
+                            // result = word.word.substr(x - word.startX, 1);
                             if (x === word.endX) {
                                 word.rendered = true;
                             }
@@ -107,9 +110,9 @@ class Grid extends Component {
                             result = {
                                 index,
                                 letter: word.word.substr(index, 1),
-                                wordIndex: i// + 1
+                                wordIndex: i // + 1
                             };
-                            //result = word.word.substr(y - word.startY, 1);
+                            // result = word.word.substr(y - word.startY, 1);
                             if (y === word.endY) {
                                 word.rendered = true;
                             }
@@ -118,13 +121,11 @@ class Grid extends Component {
             }
         }
 
-
         return result;
     };
 
     findTypedLetterByPosition(position) {
         const { typedLetters } = this.props;
-
         let result = null;
 
         typedLetters.every(typedLetter => {
@@ -138,15 +139,12 @@ class Grid extends Component {
     }
 
     validateWords() {
-
         this.props.words.forEach((word, index) => {
-
             const horizontal = word.startX !== word.endX;
             let correct = true;
             let firstLetter = null;
 
             if (horizontal) {
-
                 for (let i = word.startX, letterIndex = 0; i <= word.endX; i++, letterIndex++) {
                     const letter = word.word.substr(letterIndex, 1);
                     const position = { x: i, y: word.startY };
@@ -161,9 +159,7 @@ class Grid extends Component {
                         break;
                     }
                 }
-
             } else {
-
                 for (let i = word.startY, letterIndex = 0; i <= word.endY; i++, letterIndex++) {
                     const letter = word.word.substr(letterIndex, 1);
                     const position = { x: word.startX, y: i };
@@ -178,11 +174,11 @@ class Grid extends Component {
                         break;
                     }
                 }
-
             }
 
             const j = index + 1;
-            console.log(`Word ${j} (${firstLetter.indicator}): ` + (correct ? `correct! ${word.word}` : 'incorrect :('));
+            // eslint-disable-next-line
+            console.log(`Word ${j} (${firstLetter.indicator}): ${correct ? `correct! ${word.word}` : 'incorrect :('}`);
         });
     }
 
@@ -199,7 +195,7 @@ class Grid extends Component {
                 for (let x = 0; x < maxWidth; x++) {
                     const { letter, index, wordIndex } = Grid.getLetterFromPosition(x, y, words, wordCount);
 
-                    const position = {x, y};
+                    const position = { x, y };
                     const exists = positions.includes(position);
 
                     if (index === 0 && !exists) {
@@ -216,22 +212,14 @@ class Grid extends Component {
                         });
                     }
 
-                    cells.push(
-                        <Cell
-                            position={position}
-                            letter={letter}
-                            letterIndex={index}
-                            indicator={positions.length}
-                            key={cellKey}
-                        />
-                    );
+                    cells.push(<Cell position={position} letter={letter} letterIndex={index} indicator={positions.length} key={cellKey} />);
                 }
                 const rowKey = `row-${y}`;
                 rows.push(<Row cells={cells} key={rowKey} />);
             }
         }
 
-        //console.log('Grid::render');
+        // console.log('Grid::render');
 
         return <div className="grid">{rows}</div>;
     }
