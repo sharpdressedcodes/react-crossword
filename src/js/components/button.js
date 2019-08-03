@@ -26,7 +26,15 @@ class Button extends Component {
     render() {
         const { text, clickHandler, className } = this.props;
         return (
-            <button className={className} onClick={clickHandler} ref={c => {this.button = c;}}>{text}</button>
+            <button
+                className={className}
+                onClick={clickHandler}
+                ref={c => {
+                    this.button = c;
+                }}
+            >
+                {text}
+            </button>
         );
     }
 }

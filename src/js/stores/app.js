@@ -8,14 +8,14 @@ const { ADD_INPUT_CELL } = GridActionTypes;
 const { TOGGLE_SHOW_CORRECT_ANSWER, VALIDATE_CELLS } = CrosswordActionTypes;
 
 class AppStore extends BaseStore {
-
     static storeName = 'AppStore';
+
     static handlers = {};
 
     constructor(dispatcher) {
         super(dispatcher);
 
-        this.position = {x: -1, y: -1};
+        this.position = { x: -1, y: -1 };
         this.toggle = false;
         this.validate = false;
         this.typedLetters = [];
@@ -29,15 +29,18 @@ class AppStore extends BaseStore {
             validate: this.validate
         };
     }
+
     getPosition = () => this.position;
+
     getTypedLetters = () => this.typedLetters;
+
     getToggle = () => this.toggle;
+
     getValidate = () => this.validate;
 
     // Methods
     updateTypedLetter = (position, letter) => {
-
-        for (let i = 0, i_ = this.typedLetters.length; i < i_; i++) {
+        for (let i = 0, len = this.typedLetters.length; i < len; i++) {
             if (this.typedLetters[i].position.x === position.x && this.typedLetters[i].position.y === position.y) {
                 this.typedLetters[i].letter = letter;
                 break;
@@ -62,7 +65,6 @@ class AppStore extends BaseStore {
     };
 
     onValidateCells = payload => {
-
         if (payload.validate && this.validate) {
             this.validate = false;
             this.emitChange();
@@ -89,7 +91,6 @@ class AppStore extends BaseStore {
         this.validate = state.validate;
         this.typedLetters = state.typedLetters;
     }
-
 }
 
 AppStore.handlers[CELL_CLICKED] = 'onCellClicked';

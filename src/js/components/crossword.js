@@ -8,17 +8,21 @@ import { toggleShowCorrectAnswer, validateCells } from '../actions/crossword';
 class Crossword extends Component {
     static displayName = 'Crossword';
 
-    static MAX_WIDTH = 15; // cells
+    static MAX_WIDTH = 15;
+
+    // cells
     static MAX_HEIGHT = 15; // cells
 
     static propTypes = {
-        words: PropTypes.arrayOf(PropTypes.shape({
-            word: PropTypes.string.isRequired,
-            startX: PropTypes.number.isRequired,
-            startY: PropTypes.number.isRequired,
-            endX: PropTypes.number.isRequired,
-            endY: PropTypes.number.isRequired,
-        })).isRequired
+        words: PropTypes.arrayOf(
+            PropTypes.shape({
+                word: PropTypes.string.isRequired,
+                startX: PropTypes.number.isRequired,
+                startY: PropTypes.number.isRequired,
+                endX: PropTypes.number.isRequired,
+                endY: PropTypes.number.isRequired
+            })
+        ).isRequired
     };
 
     static contextTypes = {
@@ -30,20 +34,20 @@ class Crossword extends Component {
         return wordsChanged;
     }
 
-    onValidateClick = (event) => {
+    onValidateClick = event => {
         this.context.executeAction(validateCells, { validate: true });
     };
 
-    onShowAnswerClick = (event) => {
+    onShowAnswerClick = event => {
         this.context.executeAction(toggleShowCorrectAnswer, { toggle: true });
     };
 
-    onHideAnswerClick = (event) => {
+    onHideAnswerClick = event => {
         this.context.executeAction(toggleShowCorrectAnswer, { toggle: false });
     };
 
     render() {
-        //console.log('Crossword::render');
+        // console.log('Crossword::render');
         return (
             <Fragment>
                 <Grid
