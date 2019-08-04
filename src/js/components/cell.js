@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connectToStores } from 'fluxible-addons-react';
+import keyMirror from 'keymirror';
 import { cellClicked, cellTyped } from '../actions/cell';
 
 class Cell extends Component {
@@ -9,6 +10,8 @@ class Cell extends Component {
     static LETTER_DEFAULT = '+';
 
     static LETTER_ACTIVE = '-';
+
+    static RX_INPUT = /^[a-z+]$/i;
 
     static propTypes = {
         position: PropTypes.shape({
@@ -35,23 +38,31 @@ class Cell extends Component {
         getStore: PropTypes.func.isRequired
     };
 
+    static phaseTypes = keyMirror({
+        START: null,
+        INPUT: null,
+        FILLED: null,
+        SHOW: null,
+        VALIDATE: null
+    });
+
     constructor(props) {
         super(props);
 
         this.state = {
-            phase: 'start',
+            phase: Cell.phaseTypes.START,
             typedLetter: null
         };
         this.prevState = this.state;
     }
 
     onCellClick = event => {
-        this.setState({ phase: 'input' });
+        this.setState({ phase: Cell.phaseTypes.INPUT });
         this.context.executeAction(cellClicked, { position: this.props.position });
     };
 
     onInput = event => {
-        if (this.input.value && /^[a-zA-Z]$/.test(this.input.value)) {
+        if (this.input.value && Cell.RX_INPUT.test(this.input.value)) {
             this.input.value = this.input.value.toUpperCase();
             this.setState({ typedLetter: this.input.value });
             this.context.executeAction(cellTyped, { position: this.props.position, letter: this.input.value });
@@ -66,7 +77,7 @@ class Cell extends Component {
         if (nextProps.toggleShowCorrectAnswer !== this.props.toggleShowCorrectAnswer) {
             if (nextProps.toggleShowCorrectAnswer) {
                 this.prevState = this.state;
-                this.setState({ phase: 'show' });
+                this.setState({ phase: Cell.phaseTypes.SHOW });
             } else {
                 this.setState({ phase: this.prevState.phase });
             }
@@ -75,7 +86,7 @@ class Cell extends Component {
         if (this.props.letter !== null && nextProps.validate !== this.props.validate) {
             if (nextProps.validate) {
                 this.prevState = this.state;
-                this.setState({ phase: 'validate' });
+                this.setState({ phase: Cell.phaseTypes.VALIDATE });
             } else {
                 this.setState({ phase: this.prevState.phase });
             }
@@ -91,13 +102,13 @@ class Cell extends Component {
     }
 
     componentDidUpdate(prevProps) {
-        if (this.state.phase === 'input') {
+        if (this.state.phase === Cell.phaseTypes.INPUT) {
             this.input.focus();
         }
     }
 
     determineAndSetPhase = () => {
-        const phase = this.state.typedLetter === null ? 'start' : 'filled';
+        const phase = this.state.typedLetter === null ? Cell.phaseTypes.START : Cell.phaseTypes.FILLED;
         this.setState(prevState => ({ phase }));
     };
 
@@ -115,7 +126,7 @@ class Cell extends Component {
         }
 
         switch (phase) {
-            case 'start':
+            case Cell.phaseTypes.START:
                 el = (
                     <span onClick={clickHandler} style={style}>
                         {letter}
@@ -123,14 +134,13 @@ class Cell extends Component {
                 );
                 break;
 
-            case 'input':
+            case Cell.phaseTypes.INPUT:
                 el = (
                     <input
                         type="text"
                         onBlur={this.determineAndSetPhase}
                         onChange={this.onInput}
                         style={{ width: '25px', textAlign: 'center', border: 'none' }}
-                        pattern="^[a-zA-Z]{1}$"
                         ref={c => {
                             this.input = c;
                         }}
@@ -139,7 +149,7 @@ class Cell extends Component {
                 );
                 break;
 
-            case 'filled':
+            case Cell.phaseTypes.FILLED:
                 el = (
                     <span onClick={clickHandler} style={style}>
                         {typedLetter}
@@ -147,7 +157,7 @@ class Cell extends Component {
                 );
                 break;
 
-            case 'show':
+            case Cell.phaseTypes.SHOW:
                 el = (
                     <span onClick={clickHandler} style={style}>
                         {this.props.letter || Cell.LETTER_DEFAULT}
@@ -156,7 +166,7 @@ class Cell extends Component {
                 break;
 
             default:
-            case 'validate':
+            case Cell.phaseTypes.VALIDATE:
                 style.outline = `1px solid ${className === 'valid' ? 'green' : 'red'}`;
                 el = (
                     <span className={className} onClick={clickHandler} style={style}>
