@@ -40,8 +40,8 @@
         "clean": "rimraf ./dist/*",
         "build:dev": "npm run clean && cross-env NODE_ENV=development webpack --bail --hide-modules --progress --mode development",
         "build": "npm run clean && cross-env NODE_ENV=production webpack --bail --hide-modules --progress --mode production",
-        "fmt:js": "prettier --write ./src/js/**/*.js",
-        "lint": "npm run fmt:js && eslint --fix --ext .js ./src/js/**/*.js"
+        "fmt:js": "prettier --write ./src/js/**/*.js ./data/**/*.js",
+        "lint": "npm run fmt:js && eslint --fix --ext .js ./src/js/**/*.js ./data/**/*.js"
     },
     "dependencies": {
         "express": "^4.17.1",

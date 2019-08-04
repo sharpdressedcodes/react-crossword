@@ -4,6 +4,7 @@ import Grid from './grid';
 import Button from './button';
 import ToggleButton from './toggleButton';
 import { toggleShowCorrectAnswer, validateCells } from '../actions/crossword';
+import { wordPropType } from '../constants/crossword';
 
 class Crossword extends Component {
     static displayName = 'Crossword';
@@ -13,15 +14,7 @@ class Crossword extends Component {
     static MAX_HEIGHT = 15; // cells
 
     static propTypes = {
-        words: PropTypes.arrayOf(
-            PropTypes.shape({
-                word: PropTypes.string.isRequired,
-                startX: PropTypes.number.isRequired,
-                startY: PropTypes.number.isRequired,
-                endX: PropTypes.number.isRequired,
-                endY: PropTypes.number.isRequired
-            })
-        ).isRequired
+        words: PropTypes.arrayOf(PropTypes.shape(wordPropType)).isRequired
     };
 
     static contextTypes = {
@@ -52,6 +45,7 @@ class Crossword extends Component {
                 <Grid
                     words={this.props.words.map(word => {
                         word.rendered = false;
+                        word.horizontal = word.startX !== word.endX;
                         return word;
                     })}
                     maxWidth={Crossword.MAX_WIDTH}

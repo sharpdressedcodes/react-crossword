@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { connectToStores } from 'fluxible-addons-react';
 import keyMirror from 'keymirror';
 import { cellClicked, cellTyped } from '../actions/cell';
+import { positionPropType } from '../constants/grid';
 
 class Cell extends Component {
     static displayName = 'Cell';
@@ -14,15 +15,13 @@ class Cell extends Component {
     static RX_INPUT = /^[a-z+]$/i;
 
     static propTypes = {
-        position: PropTypes.shape({
-            x: PropTypes.number.isRequired,
-            y: PropTypes.number.isRequired
-        }).isRequired,
+        position: PropTypes.shape(positionPropType).isRequired,
         letter: PropTypes.string,
         letterIndex: PropTypes.number,
         indicator: PropTypes.number,
         toggleShowCorrectAnswer: PropTypes.bool,
-        validate: PropTypes.bool
+        validate: PropTypes.bool,
+        nextPosition: PropTypes.shape(positionPropType)
     };
 
     static defaultProps = {
@@ -30,7 +29,8 @@ class Cell extends Component {
         letterIndex: null,
         indicator: null,
         toggleShowCorrectAnswer: false,
-        validate: false
+        validate: false,
+        nextPosition: null
     };
 
     static contextTypes = {
@@ -62,14 +62,25 @@ class Cell extends Component {
     };
 
     onInput = event => {
+        const payload = {
+            position: this.props.position,
+            // parentWords: this.props.parentWords,
+            letter: null
+        };
+
+        // Give the user the ability to update their input
+        if (this.input.value.length > 0) {
+            this.input.value = this.input.value.substr(-1);
+        }
+
         if (this.input.value && Cell.RX_INPUT.test(this.input.value)) {
             this.input.value = this.input.value.toUpperCase();
             this.setState({ typedLetter: this.input.value });
-            this.context.executeAction(cellTyped, { position: this.props.position, letter: this.input.value });
+            this.context.executeAction(cellTyped, { ...payload, letter: this.input.value });
         } else {
             this.input.value = '';
             this.setState({ typedLetter: null });
-            this.context.executeAction(cellTyped, { position: this.props.position, letter: null });
+            this.context.executeAction(cellTyped, payload);
         }
     };
 
@@ -91,14 +102,25 @@ class Cell extends Component {
                 this.setState({ phase: this.prevState.phase });
             }
         }
+
+        if (
+            nextProps.nextPosition &&
+            nextProps.nextPosition !== this.props.nextPosition &&
+            this.props.position.x === nextProps.nextPosition.x &&
+            this.props.position.y === nextProps.nextPosition.y &&
+            this.state.phase !== Cell.phaseTypes.INPUT
+        ) {
+            this.setState({ phase: Cell.phaseTypes.INPUT });
+        }
     }
 
     shouldComponentUpdate(nextProps, nextState) {
         const phaseChanged = this.state.phase !== nextState.phase;
         const toggleShowCorrectAnswerChanged = this.props.letter !== null && this.props.toggleShowCorrectAnswer !== nextProps.toggleShowCorrectAnswer;
         const validateChanged = this.props.letter !== null && this.props.validate !== nextProps.validate;
+        const typedLetterChanged = this.state.typedLetter !== nextState.typedLetter;
 
-        return phaseChanged || toggleShowCorrectAnswerChanged || validateChanged;
+        return phaseChanged || toggleShowCorrectAnswerChanged || validateChanged || typedLetterChanged;
     }
 
     componentDidUpdate(prevProps) {
@@ -144,7 +166,7 @@ class Cell extends Component {
                         ref={c => {
                             this.input = c;
                         }}
-                        maxLength="1"
+                        value={typedLetter}
                     />
                 );
                 break;
@@ -197,9 +219,11 @@ const ConnectedCell = connectToStores(Cell, ['AppStore'], context => {
     const appStore = context.getStore('AppStore');
     const toggleShowCorrectAnswer = appStore.getToggle();
     const validate = appStore.getValidate();
+    const nextPosition = appStore.getNextPosition();
     return {
         toggleShowCorrectAnswer,
-        validate
+        validate,
+        nextPosition
     };
 });
 

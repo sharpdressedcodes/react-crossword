@@ -4,7 +4,7 @@ import GridActionTypes from '../constants/grid';
 import CrosswordActionTypes from '../constants/crossword';
 
 const { CELL_CLICKED, CELL_TYPED } = CellActionTypes;
-const { ADD_INPUT_CELL } = GridActionTypes;
+const { ADD_INPUT_CELL, GUESS_NEXT_INPUT_CELL } = GridActionTypes;
 const { TOGGLE_SHOW_CORRECT_ANSWER, VALIDATE_CELLS } = CrosswordActionTypes;
 
 class AppStore extends BaseStore {
@@ -19,6 +19,8 @@ class AppStore extends BaseStore {
         this.toggle = false;
         this.validate = false;
         this.typedLetters = [];
+        this.lastTypedLetter = null;
+        this.nextPosition = null;
     }
 
     // Getters
@@ -26,11 +28,16 @@ class AppStore extends BaseStore {
         return {
             position: this.position,
             toggle: this.toggle,
-            validate: this.validate
+            validate: this.validate,
+            typedLetters: this.typedLetters,
+            lastTypedLetter: this.lastTypedLetter,
+            nextPosition: this.nextPosition
         };
     }
 
     getPosition = () => this.position;
+
+    getNextPosition = () => this.nextPosition;
 
     getTypedLetters = () => this.typedLetters;
 
@@ -38,11 +45,14 @@ class AppStore extends BaseStore {
 
     getValidate = () => this.validate;
 
+    getLastTypedLetter = () => this.lastTypedLetter;
+
     // Methods
     updateTypedLetter = (position, letter) => {
         for (let i = 0, len = this.typedLetters.length; i < len; i++) {
             if (this.typedLetters[i].position.x === position.x && this.typedLetters[i].position.y === position.y) {
                 this.typedLetters[i].letter = letter;
+                this.lastTypedLetter = this.typedLetters[i];
                 break;
             }
         }
@@ -81,6 +91,11 @@ class AppStore extends BaseStore {
         this.emitChange();
     };
 
+    onGuessNextInputCell = payload => {
+        this.nextPosition = payload.position;
+        this.emitChange();
+    };
+
     dehydrate() {
         return this.getState();
     }
@@ -90,12 +105,15 @@ class AppStore extends BaseStore {
         this.toggle = state.toggle;
         this.validate = state.validate;
         this.typedLetters = state.typedLetters;
+        this.lastTypedLetter = state.lastTypedLetter;
+        this.nextPosition = state.nextPosition;
     }
 }
 
 AppStore.handlers[CELL_CLICKED] = 'onCellClicked';
 AppStore.handlers[CELL_TYPED] = 'onCellTyped';
 AppStore.handlers[ADD_INPUT_CELL] = 'onAddInputCell';
+AppStore.handlers[GUESS_NEXT_INPUT_CELL] = 'onGuessNextInputCell';
 AppStore.handlers[TOGGLE_SHOW_CORRECT_ANSWER] = 'onToggleShowCorrectAnswer';
 AppStore.handlers[VALIDATE_CELLS] = 'onValidateCells';
 
