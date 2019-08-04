@@ -279,34 +279,39 @@ class Grid extends Component {
         const { words, maxWidth, maxHeight } = this.props;
         const { rows } = this.state;
         const wordCount = words.length;
-        const positions = [];
 
         if (rows.length === 0) {
             for (let y = 0; y < maxHeight; y++) {
                 const cells = [];
 
                 for (let x = 0; x < maxWidth; x++) {
-                    const { letter, index, wordIndex, parentWords } = Grid.getLetterFromPosition(x, y, words, wordCount);
-
+                    const { letter, index, parentWords } = Grid.getLetterFromPosition(x, y, words, wordCount);
                     const position = { x, y };
-                    const exists = positions.includes(position);
-
-                    if (index === 0 && !exists) {
-                        positions.push(position);
-                    }
-
                     const cellKey = `cell-${x}`;
+                    let indicator = null;
 
                     if (letter !== null) {
+                        if (index === 0) {
+                            indicator = parentWords[0].indicator;
+                        } else if (parentWords.length > 1) {
+                            for (let i = 1, len = parentWords.length; i < len; i++) {
+                                const newIndex = Grid.getIndexFromPositionInWord(position, parentWords[i]);
+                                if (newIndex === 0) {
+                                    indicator = parentWords[i].indicator;
+                                    break;
+                                }
+                            }
+                        }
+
                         this.context.executeAction(addInputCell, {
                             position,
                             letter: '',
-                            indicator: positions.length,
+                            indicator,
                             parentWords
                         });
                     }
 
-                    cells.push(<Cell position={position} letter={letter} letterIndex={index} indicator={positions.length} key={cellKey} />);
+                    cells.push(<Cell position={position} letter={letter} indicator={indicator} key={cellKey} />);
                 }
                 const rowKey = `row-${y}`;
                 rows.push(<Row cells={cells} key={rowKey} />);

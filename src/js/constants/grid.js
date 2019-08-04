@@ -20,7 +20,7 @@ export const positionPropType = {
 export const typedLetterPropType = {
     position: PropTypes.shape(positionPropType).isRequired,
     letter: PropTypes.string.isRequired,
-    indicator: PropTypes.number.isRequired,
+    indicator: PropTypes.number,
     parentWords: PropTypes.arrayOf(PropTypes.shape(wordPropType)).isRequired
 };
 

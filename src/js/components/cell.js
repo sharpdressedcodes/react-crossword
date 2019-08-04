@@ -17,7 +17,6 @@ class Cell extends Component {
     static propTypes = {
         position: PropTypes.shape(positionPropType).isRequired,
         letter: PropTypes.string,
-        letterIndex: PropTypes.number,
         indicator: PropTypes.number,
         toggleShowCorrectAnswer: PropTypes.bool,
         validate: PropTypes.bool,
@@ -26,7 +25,6 @@ class Cell extends Component {
 
     static defaultProps = {
         letter: null,
-        letterIndex: null,
         indicator: null,
         toggleShowCorrectAnswer: false,
         validate: false,
@@ -64,7 +62,6 @@ class Cell extends Component {
     onInput = event => {
         const payload = {
             position: this.props.position,
-            // parentWords: this.props.parentWords,
             letter: null
         };
 
@@ -198,7 +195,7 @@ class Cell extends Component {
                 break;
         }
 
-        if (this.props.letterIndex === 0) {
+        if (this.props.indicator) {
             indicator = (
                 <span style={{ position: 'absolute', fontSize: '70%', color: 'lightgrey', pointerEvents: 'none' }}>{this.props.indicator}</span>
             );
