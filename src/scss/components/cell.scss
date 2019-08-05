@@ -1,0 +1,70 @@
+.crossword-cell {
+    font-family: $font-family-ubuntu-mono;
+    max-width: 50px;
+    flex-grow: 1;
+    flex-shrink: 0;
+    flex-basis: 0;
+    height: auto;
+    display: flex;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    border-right: border-style($color-cell-border);
+    transition: background-color font-weight $default-hover-speed ease-in-out;
+
+    &:not(.empty) {
+        background-color: $color-cell;
+
+        .crossword-cell--text {
+            cursor: pointer;
+        }
+    }
+
+    &:last-child {
+        border-right: border-style(transparent);
+    }
+
+    &.empty {
+        cursor: default;
+        background-color: $color-cell-empty;
+    }
+
+    &.valid {
+        background-color: $color-cell-valid
+    }
+
+    &.invalid {
+        background-color: $color-cell-invalid
+    }
+
+    &.filled {
+        font-weight: $font-style-ubuntu-mono-bold;
+    }
+
+    &--input {
+        font-family: $font-family-ubuntu-mono;
+        font-weight: $font-style-ubuntu-mono-bold;
+        height: 100%;
+        width: 100%;
+        text-align: center;
+        border: none;
+    }
+
+    &--text {
+        cursor: default;
+        display: block;
+        width: 100%;
+        text-align: center;
+        padding: 5px 0;
+    }
+
+    &--indicator {
+        position: absolute;
+        font-size: 0.6em;
+        color: $color-cell-indicator;
+        pointer-events: none;
+        top: -13%;
+        left: 2px;
+    }
+}

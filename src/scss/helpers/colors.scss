@@ -1,0 +1,10 @@
+$color-primary: #333;
+
+$color-cell: #fff;
+$color-cell-valid: #98ff68;
+$color-cell-invalid: #ff5145;
+$color-cell-empty: #bebebe;
+$color-cell-indicator: #5e5e5e;
+
+$color-crossword-border: #555;
+$color-cell-border: lighten($color-crossword-border, 25%);

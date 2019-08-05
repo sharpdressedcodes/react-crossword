@@ -131,80 +131,87 @@ class Cell extends Component {
         this.setState(prevState => ({ phase }));
     };
 
+    static renderText(text, handler = null, className = '') {
+        if (className !== '') {
+            className = ` ${className}`;
+        }
+        return (
+            <span onClick={handler} className={`crossword-cell--text${className}`}>
+                {text}
+            </span>
+        );
+    }
+
+    static renderIndicator(indicator) {
+        return <span className="crossword-cell--indicator">{indicator}</span>;
+    }
+
+    renderInput(text) {
+        return (
+            <input
+                type="text"
+                onBlur={this.determineAndSetPhase}
+                onChange={this.onInput}
+                ref={c => {
+                    this.input = c;
+                }}
+                value={text}
+                className="crossword-cell--input"
+            />
+        );
+    }
+
     render() {
         const { phase, typedLetter } = this.state;
         const letter = this.props.letter === null ? this.letterDefault : this.letterActive;
         const clickHandler = this.props.letter === null ? null : this.onCellClick;
-        const style = { cursor: 'default', display: 'inline-block', width: '25px', textAlign: 'center' };
-        const className = typedLetter !== null && typedLetter === this.props.letter ? 'valid' : 'invalid';
+        const classNames = [];
         let indicator = null;
         let el = null;
 
-        if (clickHandler !== null) {
-            style.cursor = 'pointer';
+        if (!clickHandler) {
+            classNames.push('empty');
+        }
+
+        if (typedLetter) {
+            classNames.push('filled');
         }
 
         switch (phase) {
             case PhaseTypes.START:
-                el = (
-                    <span onClick={clickHandler} style={style}>
-                        {letter}
-                    </span>
-                );
+                el = Cell.renderText(letter, clickHandler);
                 break;
 
             case PhaseTypes.INPUT:
-                el = (
-                    <input
-                        type="text"
-                        onBlur={this.determineAndSetPhase}
-                        onChange={this.onInput}
-                        style={{ width: '25px', textAlign: 'center', border: 'none' }}
-                        ref={c => {
-                            this.input = c;
-                        }}
-                        value={typedLetter || ''}
-                    />
-                );
+                el = this.renderInput(typedLetter || '');
                 break;
 
             case PhaseTypes.FILLED:
-                el = (
-                    <span onClick={clickHandler} style={style}>
-                        {typedLetter}
-                    </span>
-                );
+                el = Cell.renderText(typedLetter, clickHandler);
                 break;
 
             case PhaseTypes.SHOW:
-                el = (
-                    <span onClick={clickHandler} style={style}>
-                        {this.props.letter || this.letterDefault}
-                    </span>
-                );
+                if (clickHandler && !classNames.includes('filled')) {
+                    classNames.push('filled');
+                }
+                el = Cell.renderText(this.props.letter || this.letterDefault, clickHandler);
                 break;
 
             default:
             case PhaseTypes.VALIDATE:
-                style.outline = `1px solid ${className === 'valid' ? 'green' : 'red'}`;
-                el = (
-                    <span className={className} onClick={clickHandler} style={style}>
-                        {typedLetter || this.letterActive}
-                    </span>
-                );
+                classNames.push(typedLetter !== null && typedLetter === this.props.letter ? 'valid' : 'invalid');
+                el = Cell.renderText(typedLetter || this.letterActive, clickHandler);
                 break;
         }
 
         if (this.props.indicator) {
-            indicator = (
-                <span style={{ position: 'absolute', fontSize: '70%', color: 'lightgrey', pointerEvents: 'none' }}>{this.props.indicator}</span>
-            );
+            indicator = Cell.renderIndicator(this.props.indicator);
         }
 
         // console.log('Cell::render', 'phase=', phase);
 
         return (
-            <div className="cell" style={{ width: '25px' }}>
+            <div className={`crossword-cell ${classNames.join(' ')}`.trim()}>
                 {indicator}
                 {el}
             </div>

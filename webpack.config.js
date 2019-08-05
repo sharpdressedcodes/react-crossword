@@ -1,5 +1,9 @@
 const path = require('path');
+const webpack = require('webpack');
+const autoprefixer = require('autoprefixer');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+
 const production = process.env.NODE_ENV === 'production';
 //const isDebug = process.env.APP_DEBUG === 'true';
 
@@ -10,21 +14,34 @@ const production = process.env.NODE_ENV === 'production';
 const config = {
     bail: true,
     cache: false,
-    // devtool: 'source-map',
-    devtool: false,
+    devtool: production ? false : 'eval-source-map',
     context: __dirname + '/',
-    entry: './src/js/main.js',
+    entry: ['./src/js/main.js', './src/scss/main.scss'],
     output: {
-        //path: path.resolve(__dirname, '/dist/'),
         publicPath: '/dist/',
         path: __dirname + '/dist/',
         filename: 'bundle.js'
+    },
+    resolve: {
+        extensions: ['.js', '.jsx'],
+        alias: {
+            /*
+                ensure there is only one instance of react when resolving modules
+                this helps with symlinks
+            */
+            react: path.join(__dirname, 'node_modules/react'),
+            'react-dom': path.join(__dirname, 'node_modules/react-dom')
+        }
+    },
+    watchOptions: {
+        aggregateTimeout: 600,
+        poll: 1000
     },
     module: {
         rules: [
             {
                 test: /\.js$/,
-                //exclude: [/node_modules/],
+                exclude: [/node_modules/],
                 use: {
                     loader: 'babel-loader',
                     options: {
@@ -35,24 +52,71 @@ const config = {
                         plugins: [[require('@babel/plugin-proposal-decorators'), { legacy: true }]]
                     }
                 }
-            } /* ,
-            { test: /\.woff(2)?(\?v=[0-9]\.[0-9]\.[0-9])?$/, loader: 'url-loader?limit=10000&mimetype=application/font-woff' },
-            { test: /\.(ttf|eot|svg)(\?v=[0-9]\.[0-9]\.[0-9])?$/, loader: 'file-loader' } */
+            },
+            {
+                test: /\.scss$/,
+                use: [
+                    MiniCssExtractPlugin.loader,
+                    {
+                        loader: 'css-loader',
+                        options: {
+                            sourceMap: false,
+                            //minimize: production
+                        }
+                    },
+                    {
+                        loader: 'postcss-loader',
+                        options: {
+                            sourceMap: false,
+                            plugins: () => [
+                                autoprefixer({
+                                    //overrideBrowserslist: ['last 2 versions', 'ie >= 10', 'ios >= 9', 'Android >= 4']
+                                })
+                            ]
+                        }
+                    },
+                    'resolve-url-loader',
+                    {
+                        loader: 'sass-loader',
+                        options: {
+                            sourceMap: false,
+                            outputStyle: 'compressed'
+                        }
+                    }
+                ]
+            },
+            {
+                test: /\.(png|jpg|gif|svg|eot|ttf|woff|woff2)$/,
+                loader: 'url-loader',
+                options: {
+                    limit: 10000
+                }
+            }
         ]
     },
-    plugins: []
+    plugins: [
+        new MiniCssExtractPlugin({
+            //filename: `[name]${production ? '-[contenthash]' : ''}.css`
+            filename: `bundle.css`
+        })
+    ]
 };
 
 if (production) {
     config.plugins.push(
         new UglifyJsPlugin({
-            sourceMap: false, // Enabling this will add around 8 seconds to build time
+            sourceMap: false,
             parallel: true,
             uglifyOptions: {
                 beautify: false,
-                mangle: false, // Enabling this will add around 3 seconds to build time
-                compress: false // Enabling this will add around 20 seconds to build time
+                mangle: false,
+                compress: false
             }
+        })
+    );
+    config.plugins.push(
+        new webpack.DefinePlugin({
+            'process.env.NODE_ENV': JSON.stringify('production')
         })
     );
 }

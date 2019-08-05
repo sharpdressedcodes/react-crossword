@@ -1,0 +1,12 @@
+.crossword-question {
+    &--index {
+        display: inline-block;
+        min-width: 25px;
+        font-weight: $font-style-roboto-black;
+        font-size: 1.5em;
+    }
+
+    &:not(:first-child) {
+        margin-top: 15px;
+    }
+}

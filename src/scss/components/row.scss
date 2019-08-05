@@ -1,0 +1,11 @@
+@import './cell';
+
+.crossword-row {
+    display: flex;
+    flex-flow: row;
+    justify-content: center;
+
+    &:not(:last-child) {
+        border-bottom: border-style($color-cell-border);
+    }
+}
