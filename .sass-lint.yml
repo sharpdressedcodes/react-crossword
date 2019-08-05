@@ -11,8 +11,8 @@
 # Linter VendorPrefix, option "identifier_list"
 
 files:
-#  include:
-#    - 'src/scss/**/*.scss'
+  include:
+    - 'src/scss/**/*.scss'
 #  ignore:
 #      - '....../node_modules/**/*'
 options:
