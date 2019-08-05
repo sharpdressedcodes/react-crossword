@@ -4,4 +4,8 @@
     display: flex;
     flex-flow: row;
     justify-content: center;
+
+    &:not(:last-child) {
+        border-bottom: 1px solid $color-cell-border;
+    }
 }

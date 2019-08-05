@@ -28,9 +28,15 @@
     &:not(.empty) {
         background-color: $color-cell;
 
-        &--text {
+        .crossword-cell---text {
             cursor: pointer;
         }
+    }
+
+
+
+    &:not(:last-child) {
+        border-right: 1px solid $color-cell-border;
     }
 
     &.empty {

@@ -7,3 +7,4 @@ $color-cell-empty: #bebebe;
 $color-cell-indicator: #5e5e5e;
 
 $color-crossword-border: #555;
+$color-cell-border: lighten($color-crossword-border, 25%);
