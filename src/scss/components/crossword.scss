@@ -6,15 +6,13 @@
     margin: 0 auto;
     max-width: $crossword-max-width;
 
-    &-container {}
-
     &-buttons {
         display: flex;
         justify-content: space-between;
-        margin-top: 25px;
+        margin-top: $default-vertical-margin;
     }
 
     &-questions {
-        margin-top: 25px;
+        margin-top: $default-vertical-margin;
     }
 }

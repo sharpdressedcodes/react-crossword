@@ -6,6 +6,6 @@
     justify-content: center;
 
     &:not(:last-child) {
-        border-bottom: 1px solid $color-cell-border;
+        border-bottom: border-style($color-cell-border);
     }
 }

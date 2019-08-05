@@ -29,7 +29,7 @@ img,
 a,
 .hover {
     opacity: 1;
-    transition: opacity .2s ease-in-out;
+    transition: opacity $default-hover-speed ease-in-out;
 }
 
 img:hover,
@@ -40,8 +40,8 @@ input[type=reset]:hover,
 input[type=reset]:focus,
 .hover:hover,
 .hover:focus {
-    opacity: 0.8;
-    transition: opacity .2s ease-in-out;
+    opacity: $default-hover-opacity;
+    transition: opacity $default-hover-speed ease-in-out;
 }
 
 input[type=color],

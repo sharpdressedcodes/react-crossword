@@ -1,23 +1,17 @@
 .crossword-cell {
     font-family: $font-family-ubuntu-mono;
-    font-weight: $font-style-ubuntu-mono-bold;
     max-width: 50px;
     flex-grow: 1;
     flex-shrink: 0;
     flex-basis: 0;
     height: auto;
-
     display: flex;
     width: 100%;
     justify-content: center;
     align-items: center;
     position: relative;
-    border-right: 1px solid $color-cell-border;
-
-    &:before {
-        content: '';
-        float: left;
-    }
+    border-right: border-style($color-cell-border);
+    transition: background-color font-weight $default-hover-speed ease-in-out;
 
     &:not(.empty) {
         background-color: $color-cell;
@@ -28,12 +22,24 @@
     }
 
     &:last-child {
-        border-right: 1px solid transparent;
+        border-right: border-style(transparent);
     }
 
     &.empty {
-        cursor: pointer;
+        cursor: default;
         background-color: $color-cell-empty;
+    }
+
+    &.valid {
+        background-color: $color-cell-valid
+    }
+
+    &.invalid {
+        background-color: $color-cell-invalid
+    }
+
+    &.filled {
+        font-weight: $font-style-ubuntu-mono-bold;
     }
 
     &--input {
@@ -51,13 +57,6 @@
         width: 100%;
         text-align: center;
         padding: 5px 0;
-
-        &.valid {
-            background-color: $color-cell-valid
-        }
-        &.invalid {
-            background-color: $color-cell-invalid
-        }
     }
 
     &--indicator {
