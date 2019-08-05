@@ -1,6 +1,7 @@
-
+@import '~normalize.css';
 @import './helpers/breakpoints';
+@import './helpers/typography';
 
-body {
-    color: red;
-}
+@import './base';
+// components
+@import './pages/home';

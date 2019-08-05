@@ -135,19 +135,15 @@ class Cell extends Component {
         const { phase, typedLetter } = this.state;
         const letter = this.props.letter === null ? this.letterDefault : this.letterActive;
         const clickHandler = this.props.letter === null ? null : this.onCellClick;
-        const style = { cursor: 'default', display: 'inline-block', width: '25px', textAlign: 'center' };
-        const className = typedLetter !== null && typedLetter === this.props.letter ? 'valid' : 'invalid';
+        const additionalClass = clickHandler == null ? 'empty' : '';
+        const additionalTextClass = typedLetter !== null && typedLetter === this.props.letter ? 'valid' : 'invalid';
         let indicator = null;
         let el = null;
-
-        if (clickHandler !== null) {
-            style.cursor = 'pointer';
-        }
 
         switch (phase) {
             case PhaseTypes.START:
                 el = (
-                    <span onClick={clickHandler} style={style}>
+                    <span onClick={clickHandler} className="crossword-cell--text">
                         {letter}
                     </span>
                 );
@@ -159,18 +155,18 @@ class Cell extends Component {
                         type="text"
                         onBlur={this.determineAndSetPhase}
                         onChange={this.onInput}
-                        style={{ width: '25px', textAlign: 'center', border: 'none' }}
                         ref={c => {
                             this.input = c;
                         }}
                         value={typedLetter || ''}
+                        className="crossword-cell--input"
                     />
                 );
                 break;
 
             case PhaseTypes.FILLED:
                 el = (
-                    <span onClick={clickHandler} style={style}>
+                    <span onClick={clickHandler} className="crossword-cell--text">
                         {typedLetter}
                     </span>
                 );
@@ -178,7 +174,7 @@ class Cell extends Component {
 
             case PhaseTypes.SHOW:
                 el = (
-                    <span onClick={clickHandler} style={style}>
+                    <span onClick={clickHandler} className="crossword-cell--text">
                         {this.props.letter || this.letterDefault}
                     </span>
                 );
@@ -186,9 +182,8 @@ class Cell extends Component {
 
             default:
             case PhaseTypes.VALIDATE:
-                style.outline = `1px solid ${className === 'valid' ? 'green' : 'red'}`;
                 el = (
-                    <span className={className} onClick={clickHandler} style={style}>
+                    <span onClick={clickHandler} className={`crossword-cell--text ${additionalTextClass}`}>
                         {typedLetter || this.letterActive}
                     </span>
                 );
@@ -196,15 +191,13 @@ class Cell extends Component {
         }
 
         if (this.props.indicator) {
-            indicator = (
-                <span style={{ position: 'absolute', fontSize: '70%', color: 'lightgrey', pointerEvents: 'none' }}>{this.props.indicator}</span>
-            );
+            indicator = <span className="crossword-cell--indicator">{this.props.indicator}</span>;
         }
 
         // console.log('Cell::render', 'phase=', phase);
 
         return (
-            <div className="cell" style={{ width: '25px' }}>
+            <div className={`crossword-cell ${additionalClass}`.trim()}>
                 {indicator}
                 {el}
             </div>

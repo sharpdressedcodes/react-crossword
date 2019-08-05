@@ -1,4 +1,4 @@
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import Grid from './grid';
 import Question from './question';
@@ -46,13 +46,14 @@ class Crossword extends Component {
         });
 
         return (
-            <Fragment>
+            <section className="crossword">
                 <Grid words={words} maxWidth={maxGridWidth} maxHeight={maxGridHeight} />
-                <Button text="Validate" clickHandler={this.onValidateClick} />
+                <Button text="Validate" clickHandler={this.onValidateClick} className="crossword-button" />
                 <ToggleButton
                     on={{
                         text: 'Show correct answer',
-                        clickHandler: this.onShowAnswerClick
+                        clickHandler: this.onShowAnswerClick,
+                        className: 'crossword-toggle-button'
                     }}
                     off={{
                         text: 'Hide correct answer',
@@ -60,7 +61,7 @@ class Crossword extends Component {
                     }}
                 />
                 {questions}
-            </Fragment>
+            </section>
         );
     }
 }

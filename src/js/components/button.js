@@ -1,20 +1,12 @@
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
+import { buttonPropType, defaultButtonProps } from '../constants/button';
 
 class Button extends Component {
     static displayName = 'Button';
 
-    static propTypes = {
-        text: PropTypes.string,
-        clickHandler: PropTypes.func,
-        className: PropTypes.string
-    };
+    static propTypes = { ...buttonPropType };
 
-    static defaultProps = {
-        text: '',
-        clickHandler: () => {},
-        className: ''
-    };
+    static defaultProps = { ...defaultButtonProps };
 
     shouldComponentUpdate(nextProps, nextState) {
         const textChanged = nextProps.text !== this.props.text;
@@ -29,9 +21,6 @@ class Button extends Component {
             <button
                 className={className}
                 onClick={clickHandler}
-                ref={c => {
-                    this.button = c;
-                }}
             >
                 {text}
             </button>

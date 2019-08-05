@@ -17,17 +17,12 @@ class Question extends Component {
 
     render() {
         const { question, index } = this.props;
-        const indexElement =
-            index === null ? null : (
-                <span className="question-index" style={{ display: 'inline-block', minWidth: '15px' }}>
-                    {index}
-                </span>
-            );
+        const indexElement = index === null ? null : <span className="crossword-question--index">{index}</span>;
 
         return (
-            <div className="question">
+            <div className="crossword-question">
                 {indexElement}
-                <span className="question-text">{question}</span>
+                <span className="crossword-question--text">{question}</span>
             </div>
         );
     }

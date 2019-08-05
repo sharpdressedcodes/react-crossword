@@ -166,7 +166,7 @@ class Grid extends Component {
 
         // console.log('Grid::render');
 
-        return <div className="grid">{rows}</div>;
+        return <div className="crossword-grid">{rows}</div>;
     }
 }
 

@@ -3,16 +3,7 @@ import PropTypes from 'prop-types';
 
 function Row(props) {
     const { cells } = props;
-    const style = {
-        display: 'flex'
-        // justifyContent: 'space-evenly'
-    };
-
-    return (
-        <section className="row" style={style}>
-            {cells}
-        </section>
-    );
+    return <section className="crossword-row">{cells}</section>;
 }
 
 Row.displayName = 'Row';
