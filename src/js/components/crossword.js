@@ -10,12 +10,10 @@ import { wordPropType } from '../constants/crossword';
 class Crossword extends Component {
     static displayName = 'Crossword';
 
-    static MAX_WIDTH = 15; // cells
-
-    static MAX_HEIGHT = 15; // cells
-
     static propTypes = {
-        words: PropTypes.arrayOf(PropTypes.shape(wordPropType)).isRequired
+        words: PropTypes.arrayOf(PropTypes.shape(wordPropType)).isRequired,
+        maxGridWidth: PropTypes.number.isRequired,
+        maxGridHeight: PropTypes.number.isRequired
     };
 
     static contextTypes = {
@@ -28,7 +26,7 @@ class Crossword extends Component {
     }
 
     onValidateClick = event => {
-        this.context.executeAction(validateCells, { validate: true });
+        this.context.executeAction(validateCells, { validate: true, words: this.props.words });
     };
 
     onShowAnswerClick = event => {
@@ -41,35 +39,7 @@ class Crossword extends Component {
 
     render() {
         // console.log('Crossword::render');
-        const positions = [];
-        const words = this.props.words.map(word => {
-            word.horizontal = word.startX !== word.endX;
-
-            if (word.horizontal) {
-                for (let x = word.startX; x <= word.endX; x++) {
-                    const position = { x, y: word.startY };
-                    const exists = typeof positions.find(pos => pos.x === position.x && pos.y === position.y) !== 'undefined';
-
-                    if (x === word.startX && !exists) {
-                        positions.push(position);
-                    }
-                }
-            } else {
-                for (let y = word.startY; y <= word.endY; y++) {
-                    const position = { x: word.startX, y };
-                    const exists = typeof positions.find(pos => pos.x === position.x && pos.y === position.y) !== 'undefined';
-
-                    if (y === word.startY && !exists) {
-                        positions.push(position);
-                    }
-                }
-            }
-
-            word.indicator = positions.length;
-            word.rendered = false;
-
-            return word;
-        });
+        const { words, maxGridWidth, maxGridHeight } = this.props;
         const questions = words.map((word, index) => {
             const key = `question-${index}`;
             return <Question question={word.question} index={word.indicator} key={key} />;
@@ -77,7 +47,7 @@ class Crossword extends Component {
 
         return (
             <Fragment>
-                <Grid words={words} maxWidth={Crossword.MAX_WIDTH} maxHeight={Crossword.MAX_HEIGHT} />
+                <Grid words={words} maxWidth={maxGridWidth} maxHeight={maxGridHeight} />
                 <Button text="Validate" clickHandler={this.onValidateClick} />
                 <ToggleButton
                     on={{
