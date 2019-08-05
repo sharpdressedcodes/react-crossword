@@ -135,7 +135,11 @@ class Cell extends Component {
         if (className !== '') {
             className = ` ${className}`;
         }
-        return <span onClick={handler} className={`crossword-cell--text${className}`}>{text}</span>;
+        return (
+            <span onClick={handler} className={`crossword-cell--text${className}`}>
+                {text}
+            </span>
+        );
     }
 
     static renderIndicator(indicator) {
