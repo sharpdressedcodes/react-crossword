@@ -1,55 +1,25 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { connectToStores } from 'fluxible-addons-react';
 import Row from './row';
 import Cell from './cell';
 import { addInputCell } from '../actions/grid';
+import { wordPropType } from '../constants/grid';
 
 class Grid extends Component {
     static displayName = 'Grid';
 
     static propTypes = {
-        words: PropTypes.arrayOf(
-            PropTypes.shape({
-                word: PropTypes.string.isRequired,
-                startX: PropTypes.number.isRequired,
-                startY: PropTypes.number.isRequired,
-                endX: PropTypes.number.isRequired,
-                endY: PropTypes.number.isRequired
-            })
-        ).isRequired,
+        words: PropTypes.arrayOf(PropTypes.shape(wordPropType)).isRequired,
         maxWidth: PropTypes.number.isRequired,
-        maxHeight: PropTypes.number.isRequired,
-        currentPosition: PropTypes.shape({
-            x: PropTypes.number.isRequired,
-            y: PropTypes.number.isRequired
-        }),
-        validate: PropTypes.bool,
-        typedLetters: PropTypes.arrayOf(
-            PropTypes.shape({
-                position: PropTypes.shape({
-                    x: PropTypes.number.isRequired,
-                    y: PropTypes.number.isRequired
-                }).isRequired,
-                letter: PropTypes.string.isRequired,
-                indicator: PropTypes.number.isRequired
-            })
-        )
-    };
-
-    static defaultProps = {
-        currentPosition: null,
-        validate: false,
-        typedLetters: []
+        maxHeight: PropTypes.number.isRequired
     };
 
     static contextTypes = {
-        executeAction: PropTypes.func.isRequired,
-        getStore: PropTypes.func.isRequired
+        executeAction: PropTypes.func.isRequired
     };
 
-    constructor(props) {
-        super(props);
+    constructor(props, context) {
+        super(props, context);
 
         this.state = {
             rows: []
@@ -59,40 +29,32 @@ class Grid extends Component {
     shouldComponentUpdate(nextProps, nextState) {
         const wordsChanged = nextProps.words !== this.props.words;
         const rowsChanged = nextState.rows !== this.state.rows;
-        const currentPositionChanged = nextProps.currentPosition !== this.props.currentPosition;
-        const validateChanged = nextProps.validate !== this.props.validate;
 
-        return wordsChanged || rowsChanged || currentPositionChanged || validateChanged;
+        return wordsChanged || rowsChanged;
     }
 
-    componentWillReceiveProps(nextProps) {
-        if (!this.props.validate && nextProps.validate !== this.props.validate) {
-            this.validateWords();
-        }
-    }
-
-    static getLetterFromPosition = (x, y, words, wordCount) => {
+    static getLetterFromPosition(x, y, words, wordCount) {
         let result = {
             index: null,
             letter: null,
-            wordIndex: null
+            wordIndex: null,
+            parentWords: null
         };
         let index = null;
 
-        for (let i = 0; i < wordCount; i++) {
+        for (let i = 0; i < wordCount && index === null; i++) {
             const word = words[i];
 
             if (!word.rendered) {
-                const horizontal = word.startX !== word.endX;
-
-                switch (horizontal) {
+                switch (word.horizontal) {
                     case true:
                         if (word.startY === y && x > word.startX - 1 && x < word.endX + 1) {
                             index = x - word.startX;
                             result = {
                                 index,
-                                letter: word.word.substr(index, 1),
-                                wordIndex: i // + 1
+                                letter: word.answer.substr(index, 1),
+                                wordIndex: i,
+                                parentWords: [word]
                             };
                             if (x === word.endX) {
                                 word.rendered = true;
@@ -105,8 +67,9 @@ class Grid extends Component {
                             index = y - word.startY;
                             result = {
                                 index,
-                                letter: word.word.substr(index, 1),
-                                wordIndex: i // + 1
+                                letter: word.answer.substr(index, 1),
+                                wordIndex: i,
+                                parentWords: [word]
                             };
                             if (y === word.endY) {
                                 word.rendered = true;
@@ -116,98 +79,85 @@ class Grid extends Component {
             }
         }
 
-        return result;
-    };
-
-    findTypedLetterByPosition(position) {
-        const { typedLetters } = this.props;
-        let result = null;
-
-        typedLetters.every(typedLetter => {
-            if (typedLetter.position.x === position.x && typedLetter.position.y === position.y) {
-                result = typedLetter;
+        if (index !== null) {
+            // Does this letter belong to more than 1 word?
+            for (let i = 0; i < wordCount; i++) {
+                const word = words[i];
+                const letterIndex = Grid.getIndexFromPositionInWord({ x, y }, word);
+                if (letterIndex > -1 && !result.parentWords.includes(word)) {
+                    result.parentWords.push(word);
+                }
             }
-            return result === null;
-        });
+        }
 
         return result;
     }
 
-    validateWords() {
-        this.props.words.forEach((word, index) => {
-            const horizontal = word.startX !== word.endX;
-            let correct = true;
-            let firstLetter = null;
+    static getIndexFromPositionInWord(position, word) {
+        let index = -1;
 
-            if (horizontal) {
-                for (let i = word.startX, letterIndex = 0; i <= word.endX; i++, letterIndex++) {
-                    const letter = word.word.substr(letterIndex, 1);
-                    const position = { x: i, y: word.startY };
-                    const typedLetter = this.findTypedLetterByPosition(position);
-
-                    if (!firstLetter) {
-                        firstLetter = typedLetter;
-                    }
-
-                    if (letter !== typedLetter.letter) {
-                        correct = false;
-                        break;
+        switch (word.horizontal) {
+            case true:
+                if (word.startY === position.y) {
+                    for (let x = word.startX; x <= word.endX; x++) {
+                        if (x === position.x) {
+                            index = x - word.startX;
+                            break;
+                        }
                     }
                 }
-            } else {
-                for (let i = word.startY, letterIndex = 0; i <= word.endY; i++, letterIndex++) {
-                    const letter = word.word.substr(letterIndex, 1);
-                    const position = { x: word.startX, y: i };
-                    const typedLetter = this.findTypedLetterByPosition(position);
+                break;
 
-                    if (!firstLetter) {
-                        firstLetter = typedLetter;
-                    }
-
-                    if (letter !== typedLetter.letter) {
-                        correct = false;
-                        break;
+            default:
+                if (word.startX === position.x) {
+                    for (let y = word.startY; y <= word.endY; y++) {
+                        if (y === position.y) {
+                            index = y - word.startY;
+                            break;
+                        }
                     }
                 }
-            }
-
-            const j = index + 1;
-            // eslint-disable-next-line
-            console.log(`Word ${j} (${firstLetter.indicator}): ${correct ? `correct! ${word.word}` : 'incorrect :('}`);
-        });
+        }
+        return index;
     }
 
     render() {
         const { words, maxWidth, maxHeight } = this.props;
         const { rows } = this.state;
         const wordCount = words.length;
-        const positions = [];
 
         if (rows.length === 0) {
             for (let y = 0; y < maxHeight; y++) {
                 const cells = [];
 
                 for (let x = 0; x < maxWidth; x++) {
-                    const { letter, index, wordIndex } = Grid.getLetterFromPosition(x, y, words, wordCount);
-
+                    const { letter, index, parentWords } = Grid.getLetterFromPosition(x, y, words, wordCount);
                     const position = { x, y };
-                    const exists = positions.includes(position);
-
-                    if (index === 0 && !exists) {
-                        positions.push(position);
-                    }
-
                     const cellKey = `cell-${x}`;
+                    let indicator = null;
 
                     if (letter !== null) {
+                        if (index === 0) {
+                            indicator = parentWords[0].indicator;
+                        } else if (parentWords.length > 1) {
+                            for (let i = 1, len = parentWords.length; i < len; i++) {
+                                const newIndex = Grid.getIndexFromPositionInWord(position, parentWords[i]);
+                                if (newIndex === 0) {
+                                    indicator = parentWords[i].indicator;
+                                    break;
+                                }
+                            }
+                        }
+
                         this.context.executeAction(addInputCell, {
                             position,
                             letter: '',
-                            indicator: positions.length
+                            indicator,
+                            parentWords
                         });
                     }
 
-                    cells.push(<Cell position={position} letter={letter} letterIndex={index} indicator={positions.length} key={cellKey} />);
+                    cells.push(<Cell position={position} letter={letter} indicator={indicator} key={cellKey} />);
                 }
                 const rowKey = `row-${y}`;
                 rows.push(<Row cells={cells} key={rowKey} />);
@@ -220,16 +170,4 @@ class Grid extends Component {
     }
 }
 
-const ConnectedGrid = connectToStores(Grid, ['AppStore'], context => {
-    const appStore = context.getStore('AppStore');
-    const currentPosition = appStore.getPosition();
-    const validate = appStore.getValidate();
-    const typedLetters = appStore.getTypedLetters();
-    return {
-        currentPosition,
-        validate,
-        typedLetters
-    };
-});
-
-export default ConnectedGrid;
+export default Grid;

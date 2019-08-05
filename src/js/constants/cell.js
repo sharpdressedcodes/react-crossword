@@ -5,4 +5,12 @@ const ActionTypes = keyMirror({
     CELL_TYPED: null
 });
 
+export const PhaseTypes = keyMirror({
+    START: null,
+    INPUT: null,
+    FILLED: null,
+    SHOW: null,
+    VALIDATE: null
+});
+
 export default ActionTypes;

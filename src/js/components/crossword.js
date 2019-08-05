@@ -1,27 +1,19 @@
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import Grid from './grid';
+import Question from './question';
 import Button from './button';
 import ToggleButton from './toggleButton';
 import { toggleShowCorrectAnswer, validateCells } from '../actions/crossword';
+import { wordPropType } from '../constants/crossword';
 
 class Crossword extends Component {
     static displayName = 'Crossword';
 
-    static MAX_WIDTH = 15; // cells
-
-    static MAX_HEIGHT = 15; // cells
-
     static propTypes = {
-        words: PropTypes.arrayOf(
-            PropTypes.shape({
-                word: PropTypes.string.isRequired,
-                startX: PropTypes.number.isRequired,
-                startY: PropTypes.number.isRequired,
-                endX: PropTypes.number.isRequired,
-                endY: PropTypes.number.isRequired
-            })
-        ).isRequired
+        words: PropTypes.arrayOf(PropTypes.shape(wordPropType)).isRequired,
+        maxGridWidth: PropTypes.number.isRequired,
+        maxGridHeight: PropTypes.number.isRequired
     };
 
     static contextTypes = {
@@ -34,7 +26,7 @@ class Crossword extends Component {
     }
 
     onValidateClick = event => {
-        this.context.executeAction(validateCells, { validate: true });
+        this.context.executeAction(validateCells, { validate: true, words: this.props.words });
     };
 
     onShowAnswerClick = event => {
@@ -47,16 +39,15 @@ class Crossword extends Component {
 
     render() {
         // console.log('Crossword::render');
+        const { words, maxGridWidth, maxGridHeight } = this.props;
+        const questions = words.map((word, index) => {
+            const key = `question-${index}`;
+            return <Question question={word.question} index={word.indicator} key={key} />;
+        });
+
         return (
             <Fragment>
-                <Grid
-                    words={this.props.words.map(word => {
-                        word.rendered = false;
-                        return word;
-                    })}
-                    maxWidth={Crossword.MAX_WIDTH}
-                    maxHeight={Crossword.MAX_HEIGHT}
-                />
+                <Grid words={words} maxWidth={maxGridWidth} maxHeight={maxGridHeight} />
                 <Button text="Validate" clickHandler={this.onValidateClick} />
                 <ToggleButton
                     on={{
@@ -68,6 +59,7 @@ class Crossword extends Component {
                         clickHandler: this.onHideAnswerClick
                     }}
                 />
+                {questions}
             </Fragment>
         );
     }

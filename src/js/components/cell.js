@@ -1,7 +1,10 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connectToStores } from 'fluxible-addons-react';
+import get from 'lodash/get';
 import { cellClicked, cellTyped } from '../actions/cell';
+import { PhaseTypes } from '../constants/cell';
+import { positionPropType } from '../constants/grid';
 
 class Cell extends Component {
     static displayName = 'Cell';
@@ -10,55 +13,71 @@ class Cell extends Component {
 
     static LETTER_ACTIVE = '-';
 
+    static RX_INPUT = /^[a-z+]$/i;
+
     static propTypes = {
-        position: PropTypes.shape({
-            x: PropTypes.number.isRequired,
-            y: PropTypes.number.isRequired
-        }).isRequired,
+        position: PropTypes.shape(positionPropType).isRequired,
         letter: PropTypes.string,
-        letterIndex: PropTypes.number,
         indicator: PropTypes.number,
         toggleShowCorrectAnswer: PropTypes.bool,
-        validate: PropTypes.bool
+        validate: PropTypes.bool,
+        nextPosition: PropTypes.shape(positionPropType)
     };
 
     static defaultProps = {
         letter: null,
-        letterIndex: null,
         indicator: null,
         toggleShowCorrectAnswer: false,
-        validate: false
+        validate: false,
+        nextPosition: null
     };
 
     static contextTypes = {
+        config: PropTypes.object.isRequired,
         executeAction: PropTypes.func.isRequired,
         getStore: PropTypes.func.isRequired
     };
 
-    constructor(props) {
-        super(props);
+    constructor(props, context) {
+        super(props, context);
+
+        const { config } = context;
+
+        this.letterDefault = get(config, 'app.cell.letterDefault', Cell.LETTER_DEFAULT);
+        this.letterActive = get(config, 'app.cell.letterActive', Cell.LETTER_ACTIVE);
+        this.regex = get(config, 'app.cell.regex', Cell.RX_INPUT);
 
         this.state = {
-            phase: 'start',
+            phase: PhaseTypes.START,
             typedLetter: null
         };
         this.prevState = this.state;
     }
 
     onCellClick = event => {
-        this.setState({ phase: 'input' });
+        this.setState({ phase: PhaseTypes.INPUT });
         this.context.executeAction(cellClicked, { position: this.props.position });
     };
 
     onInput = event => {
-        if (this.input.value && /^[a-zA-Z]$/.test(this.input.value)) {
+        const payload = {
+            position: this.props.position,
+            letter: null
+        };
+
+        // Give the user the ability to update their input
+        if (this.input.value.length > 0) {
+            this.input.value = this.input.value.substr(-1);
+        }
+
+        if (this.input.value && this.regex.test(this.input.value)) {
             this.input.value = this.input.value.toUpperCase();
             this.setState({ typedLetter: this.input.value });
-            this.context.executeAction(cellTyped, { position: this.props.position, letter: this.input.value });
+            this.context.executeAction(cellTyped, { ...payload, letter: this.input.value });
         } else {
             this.input.value = '';
             this.setState({ typedLetter: null });
-            this.context.executeAction(cellTyped, { position: this.props.position, letter: null });
+            this.context.executeAction(cellTyped, payload);
         }
     };
 
@@ -66,7 +85,7 @@ class Cell extends Component {
         if (nextProps.toggleShowCorrectAnswer !== this.props.toggleShowCorrectAnswer) {
             if (nextProps.toggleShowCorrectAnswer) {
                 this.prevState = this.state;
-                this.setState({ phase: 'show' });
+                this.setState({ phase: PhaseTypes.SHOW });
             } else {
                 this.setState({ phase: this.prevState.phase });
             }
@@ -75,10 +94,20 @@ class Cell extends Component {
         if (this.props.letter !== null && nextProps.validate !== this.props.validate) {
             if (nextProps.validate) {
                 this.prevState = this.state;
-                this.setState({ phase: 'validate' });
+                this.setState({ phase: PhaseTypes.VALIDATE });
             } else {
                 this.setState({ phase: this.prevState.phase });
             }
+        }
+
+        if (
+            nextProps.nextPosition &&
+            nextProps.nextPosition !== this.props.nextPosition &&
+            this.props.position.x === nextProps.nextPosition.x &&
+            this.props.position.y === nextProps.nextPosition.y &&
+            this.state.phase !== PhaseTypes.INPUT
+        ) {
+            this.setState({ phase: PhaseTypes.INPUT });
         }
     }
 
@@ -86,24 +115,25 @@ class Cell extends Component {
         const phaseChanged = this.state.phase !== nextState.phase;
         const toggleShowCorrectAnswerChanged = this.props.letter !== null && this.props.toggleShowCorrectAnswer !== nextProps.toggleShowCorrectAnswer;
         const validateChanged = this.props.letter !== null && this.props.validate !== nextProps.validate;
+        const typedLetterChanged = this.state.typedLetter !== nextState.typedLetter;
 
-        return phaseChanged || toggleShowCorrectAnswerChanged || validateChanged;
+        return phaseChanged || toggleShowCorrectAnswerChanged || validateChanged || typedLetterChanged;
     }
 
     componentDidUpdate(prevProps) {
-        if (this.state.phase === 'input') {
+        if (this.state.phase === PhaseTypes.INPUT) {
             this.input.focus();
         }
     }
 
     determineAndSetPhase = () => {
-        const phase = this.state.typedLetter === null ? 'start' : 'filled';
+        const phase = this.state.typedLetter === null ? PhaseTypes.START : PhaseTypes.FILLED;
         this.setState(prevState => ({ phase }));
     };
 
     render() {
         const { phase, typedLetter } = this.state;
-        const letter = this.props.letter === null ? Cell.LETTER_DEFAULT : Cell.LETTER_ACTIVE;
+        const letter = this.props.letter === null ? this.letterDefault : this.letterActive;
         const clickHandler = this.props.letter === null ? null : this.onCellClick;
         const style = { cursor: 'default', display: 'inline-block', width: '25px', textAlign: 'center' };
         const className = typedLetter !== null && typedLetter === this.props.letter ? 'valid' : 'invalid';
@@ -115,7 +145,7 @@ class Cell extends Component {
         }
 
         switch (phase) {
-            case 'start':
+            case PhaseTypes.START:
                 el = (
                     <span onClick={clickHandler} style={style}>
                         {letter}
@@ -123,23 +153,22 @@ class Cell extends Component {
                 );
                 break;
 
-            case 'input':
+            case PhaseTypes.INPUT:
                 el = (
                     <input
                         type="text"
                         onBlur={this.determineAndSetPhase}
                         onChange={this.onInput}
                         style={{ width: '25px', textAlign: 'center', border: 'none' }}
-                        pattern="^[a-zA-Z]{1}$"
                         ref={c => {
                             this.input = c;
                         }}
-                        maxLength="1"
+                        value={typedLetter || ''}
                     />
                 );
                 break;
 
-            case 'filled':
+            case PhaseTypes.FILLED:
                 el = (
                     <span onClick={clickHandler} style={style}>
                         {typedLetter}
@@ -147,26 +176,26 @@ class Cell extends Component {
                 );
                 break;
 
-            case 'show':
+            case PhaseTypes.SHOW:
                 el = (
                     <span onClick={clickHandler} style={style}>
-                        {this.props.letter || Cell.LETTER_DEFAULT}
+                        {this.props.letter || this.letterDefault}
                     </span>
                 );
                 break;
 
             default:
-            case 'validate':
+            case PhaseTypes.VALIDATE:
                 style.outline = `1px solid ${className === 'valid' ? 'green' : 'red'}`;
                 el = (
                     <span className={className} onClick={clickHandler} style={style}>
-                        {typedLetter || Cell.LETTER_ACTIVE}
+                        {typedLetter || this.letterActive}
                     </span>
                 );
                 break;
         }
 
-        if (this.props.letterIndex === 0) {
+        if (this.props.indicator) {
             indicator = (
                 <span style={{ position: 'absolute', fontSize: '70%', color: 'lightgrey', pointerEvents: 'none' }}>{this.props.indicator}</span>
             );
@@ -187,9 +216,11 @@ const ConnectedCell = connectToStores(Cell, ['AppStore'], context => {
     const appStore = context.getStore('AppStore');
     const toggleShowCorrectAnswer = appStore.getToggle();
     const validate = appStore.getValidate();
+    const nextPosition = appStore.getNextPosition();
     return {
         toggleShowCorrectAnswer,
-        validate
+        validate,
+        nextPosition
     };
 });
 

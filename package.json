@@ -40,14 +40,16 @@
         "clean": "rimraf ./dist/*",
         "build:dev": "npm run clean && cross-env NODE_ENV=development webpack --bail --hide-modules --progress --mode development",
         "build": "npm run clean && cross-env NODE_ENV=production webpack --bail --hide-modules --progress --mode production",
-        "fmt:js": "prettier --write ./src/js/**/*.js",
-        "lint": "npm run fmt:js && eslint --fix --ext .js ./src/js/**/*.js"
+        "fmt:js": "prettier --write ./src/js/**/*.js ./data/**/*.js",
+        "lint": "npm run fmt:js && eslint --fix --ext .js ./src/js/**/*.js ./data/**/*.js"
     },
     "dependencies": {
         "express": "^4.17.1",
         "fluxible": "^1.4.0",
         "fluxible-addons-react": "^0.2.16",
+        "fluxible-plugin-context-config": "^2.0.0",
         "keymirror": "^0.1.1",
+        "lodash": "^4.17.15",
         "prop-types": "^15.7.2",
         "react": "^16.8.6",
         "react-dom": "^16.8.6"
