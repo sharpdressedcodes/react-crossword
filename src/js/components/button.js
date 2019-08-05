@@ -18,10 +18,7 @@ class Button extends Component {
     render() {
         const { text, clickHandler, className } = this.props;
         return (
-            <button
-                className={className}
-                onClick={clickHandler}
-            >
+            <button className={`button ${className}`} onClick={clickHandler}>
                 {text}
             </button>
         );

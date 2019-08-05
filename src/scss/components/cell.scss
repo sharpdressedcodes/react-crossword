@@ -1,34 +1,74 @@
 .crossword-cell {
-    width: 25px;
+    font-family: $font-family-ubuntu-mono;
+    font-weight: $font-style-ubuntu-mono-bold;
+    //width: 15px;
+
+    //background: tomato;
+    //margin: 10px;
+    max-width: 50px;
+    flex-grow: 1;
+    flex-shrink: 0;
+    flex-basis: 0;
+    height: auto;
+
+    display: flex;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    //text-align: center;
+
+    &:before {
+        // The psuedo-element's padding-top percentage is based on the element's width.
+        //padding-top: 100%;
+        content: '';
+        float: left;
+    }
+
+
+    &:not(.empty) {
+        background-color: $color-cell;
+
+        &--text {
+            cursor: pointer;
+        }
+    }
 
     &.empty {
         cursor: pointer;
+        background-color: $color-cell-empty;
     }
 
     &--input {
-        width: 25px;
+        //width: 15px;
+        width: 100%;
         text-align: center;
         border: none;
     }
 
     &--text {
         cursor: default;
-        display: inline-block;
-        width: 25px;
+        display: block;
+        width: 100%;
         text-align: center;
+        padding: 5px 0;
 
         &.valid {
-            background-color: green;
+            background-color: $color-cell-valid
         }
         &.invalid {
-            background-color: red;
+            background-color: $color-cell-invalid
         }
     }
 
     &--indicator {
         position: absolute;
-        font-size: 70%;
-        color: lightslategray;
+        font-size: 0.6em;
+        color: $color-cell-indicator;
         pointer-events: none;
+        margin: -5px 0 0 -5px;
+
+        @include breakpoint(medium up) {
+            margin: -12px 0 0 -12px;
+        }
     }
 }

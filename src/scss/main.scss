@@ -1,7 +1,7 @@
 @import '~normalize.css';
+@import './helpers/variables';
 @import './helpers/breakpoints';
 @import './helpers/typography';
-
+@import './helpers/colors';
 @import './base';
-// components
 @import './pages/home';

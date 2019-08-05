@@ -47,20 +47,24 @@ class Crossword extends Component {
 
         return (
             <section className="crossword">
-                <Grid words={words} maxWidth={maxGridWidth} maxHeight={maxGridHeight} />
-                <Button text="Validate" clickHandler={this.onValidateClick} className="crossword-button" />
-                <ToggleButton
-                    on={{
-                        text: 'Show correct answer',
-                        clickHandler: this.onShowAnswerClick,
-                        className: 'crossword-toggle-button'
-                    }}
-                    off={{
-                        text: 'Hide correct answer',
-                        clickHandler: this.onHideAnswerClick
-                    }}
-                />
-                {questions}
+                <div className="crossword-container">
+                    <Grid words={words} maxWidth={maxGridWidth} maxHeight={maxGridHeight} />
+                    <div className="crossword-buttons">
+                        <Button text="Validate" clickHandler={this.onValidateClick} className="crossword-button" />
+                        <ToggleButton
+                            on={{
+                                text: 'Show correct answer',
+                                clickHandler: this.onShowAnswerClick,
+                                className: 'crossword-toggle-button'
+                            }}
+                            off={{
+                                text: 'Hide correct answer',
+                                clickHandler: this.onHideAnswerClick
+                            }}
+                        />
+                    </div>
+                </div>
+                <div className="crossword-questions">{questions}</div>
             </section>
         );
     }

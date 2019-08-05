@@ -1,2 +1,5 @@
 @import './row';
 
+.crossword-grid {
+    outline: 1px solid $color-crossword-border;
+}

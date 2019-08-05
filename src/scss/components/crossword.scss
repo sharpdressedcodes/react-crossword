@@ -1,3 +1,20 @@
 @import './grid';
 @import './button';
 @import './question';
+
+.crossword {
+    margin: 0 auto;
+    max-width: $crossword-max-width;
+
+    &-container {}
+
+    &-buttons {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 25px;
+    }
+
+    &-questions {
+        margin-top: 25px;
+    }
+}

@@ -7,10 +7,39 @@ $large-range-max: 9999997px;
 $xlarge-range-min: 9999998px;
 $xlarge-range-max: 9999999px;
 
-$breakpoints: (
-    small: 0,
-    medium: 691px,
-    large: 1024px,
-    xlarge: 9999998px,
-    xxlarge: 10000000px,
-) /*!default*/;
+@mixin breakpoint($breakpoint) {
+
+    $bp: $breakpoint;
+    $modifier: '';
+
+    @if length($breakpoint) > 1 {
+        $bp: nth($breakpoint, 1);
+        $modifier: nth($breakpoint, 2);
+    }
+
+    @if $bp == 'small' and $modifier == 'only' {
+        @media screen and (max-width: $small-range-max) {
+            @content;
+        }
+    } @else if $bp == 'medium' and $modifier == 'only' {
+        @media screen and (min-width: $medium-range-min) and (max-width: $medium-range-max) {
+            @content;
+        }
+    } @else if $bp == 'medium' and $modifier == 'up' {
+        @media screen and (min-width: $medium-range-min) {
+            @content;
+        }
+    } @else if $bp == 'large' and $modifier == 'only' {
+        @media screen and (min-width: $large-range-min) and (max-width: $large-range-max) {
+            @content;
+        }
+    } @else if $bp == 'large' and $modifier == 'up' {
+        @media screen and (min-width: $large-range-min) {
+            @content;
+        }
+    } @else if $bp == 'xlarge' and $modifier == 'only' {
+        @media screen and (min-width: $xlarge-range-min) {
+            @content;
+        }
+    }
+}
