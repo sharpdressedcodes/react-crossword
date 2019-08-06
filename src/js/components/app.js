@@ -37,10 +37,18 @@ class App extends Component {
         });
     }
 
+    /**
+     * Parse the incoming words. More can be done here, like calculating the end position based on the length of the answer.
+     * @param words
+     * @returns parsed words
+     */
     static parseWords(words) {
         const positions = [];
         words = words.map(word => {
             word.horizontal = word.startX !== word.endX;
+
+            // Loop through words, keeping track the position of each unique cell
+            // This gets used as the indicator.
 
             if (word.horizontal) {
                 for (let x = word.startX; x <= word.endX; x++) {

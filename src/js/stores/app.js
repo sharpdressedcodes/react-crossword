@@ -23,7 +23,6 @@ class AppStore extends BaseStore {
         this.lastTypedLetter = null;
         this.nextPosition = null;
         this.direction = null;
-
         this.maxGridWidth = 0;
         this.maxGridHeight = 0;
         this.validatedWords = [];
@@ -39,7 +38,6 @@ class AppStore extends BaseStore {
             lastTypedLetter: this.lastTypedLetter,
             nextPosition: this.nextPosition,
             direction: this.direction,
-
             maxGridWidth: this.maxGridWidth,
             maxGridHeight: this.maxGridHeight,
             validatedWords: this.validatedWords
@@ -67,6 +65,12 @@ class AppStore extends BaseStore {
     getMaxGridHeight = () => this.maxGridHeight;
 
     // Methods
+    /**
+     * Updates the current typed letter for a given position.
+     *
+     * @param position An object containing x and y positions.
+     * @param letter The updated letter object.
+     */
     updateTypedLetter(position, letter) {
         for (let i = 0, len = this.typedLetters.length; i < len; i++) {
             if (this.typedLetters[i].position.x === position.x && this.typedLetters[i].position.y === position.y) {
@@ -77,6 +81,12 @@ class AppStore extends BaseStore {
         }
     }
 
+    /**
+     * Looks up a typedLetter object by it's position (x, y) on the Grid.
+     *
+     * @param position An object containing x and y positions.
+     * @returns Null|Object Null if it fails, otherwise it returns the typedLetter object.
+     */
     findTypedLetterByPosition(position) {
         let result = this.typedLetters.find(typedLetter => {
             return typedLetter.position.x === position.x && typedLetter.position.y === position.y;
@@ -89,6 +99,12 @@ class AppStore extends BaseStore {
         return result;
     }
 
+    /**
+     * Try to guess where the next key is about to be pressed.
+     *
+     * @param position The current position object (x, y)
+     * @returns null|Object Null of it fails, or the next position as an object (x, y).
+     */
     guessNextPosition(position) {
         const typedLetter = this.findTypedLetterByPosition(position);
         let nextPosition = null;
@@ -114,6 +130,12 @@ class AppStore extends BaseStore {
         return nextPosition;
     }
 
+    /**
+     * Is the next horizontal cell empty, or are we at the end of the grid?
+     *
+     * @param typedLetter The letter object.
+     * @returns null|Object Null of it fails, or the next position as an object (x, y).
+     */
     checkNextHorizontalPosition(typedLetter) {
         let nextPosition = null;
         let nextValue = null;
@@ -134,6 +156,12 @@ class AppStore extends BaseStore {
         return nextPosition;
     }
 
+    /**
+     * Is the next vertical cell empty, or are we at the end of the grid?
+     *
+     * @param typedLetter The letter object.
+     * @returns null|Object Null of it fails, or the next position as an object (x, y).
+     */
     checkNextVerticalPosition(typedLetter) {
         let nextPosition = null;
         let nextValue = null;
@@ -154,6 +182,11 @@ class AppStore extends BaseStore {
         return nextPosition;
     }
 
+    /**
+     * Method used to check which words are right and wrong. Outputs results to the console.
+     * @param words The questions and answer data.
+     * @returns {Array} An array of results.
+     */
     validateWords(words) {
         const validatedWords = [];
         words.forEach((word, index) => {
@@ -256,7 +289,6 @@ class AppStore extends BaseStore {
         this.lastTypedLetter = state.lastTypedLetter;
         this.nextPosition = state.nextPosition;
         this.direction = state.direction;
-
         this.maxGridWidth = state.maxGridWidth;
         this.maxGridHeight = state.maxGridHeight;
         this.validatedWords = state.validatedWords;

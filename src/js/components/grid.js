@@ -33,6 +33,15 @@ class Grid extends Component {
         return wordsChanged || rowsChanged;
     }
 
+    /**
+     * Get letter information from a given position (x, y) on the grid.
+     *
+     * @param x The x position
+     * @param y The y position
+     * @param words The questions and answer data
+     * @param wordCount Used to prevent useless array length counts inside loops
+     * @returns {{index: null, letter: null, wordIndex: null, parentWords: null}}
+     */
     static getLetterFromPosition(x, y, words, wordCount) {
         let result = {
             index: null,
@@ -45,6 +54,7 @@ class Grid extends Component {
         for (let i = 0; i < wordCount && index === null; i++) {
             const word = words[i];
 
+            // Only check words that haven't yet been checked.
             if (!word.rendered) {
                 switch (word.horizontal) {
                     case true:
@@ -93,6 +103,13 @@ class Grid extends Component {
         return result;
     }
 
+    /**
+     * Get the letter position in the word from a given position on the grid.
+     *
+     * @param position An object containing x and y positions.
+     * @param word The subject
+     * @returns {number} The index of the letter or -1 if it fails
+     */
     static getIndexFromPositionInWord(position, word) {
         let index = -1;
 
@@ -127,9 +144,12 @@ class Grid extends Component {
         const wordCount = words.length;
 
         if (rows.length === 0) {
+
+            // Render rows, vertically
             for (let y = 0; y < maxHeight; y++) {
                 const cells = [];
 
+                // Render cells, horizontally
                 for (let x = 0; x < maxWidth; x++) {
                     const { letter, index, parentWords } = Grid.getLetterFromPosition(x, y, words, wordCount);
                     const position = { x, y };
@@ -137,9 +157,14 @@ class Grid extends Component {
                     let indicator = null;
 
                     if (letter !== null) {
+
+                        // If this is the first letter, it's safe to use the first parentWord indicator
                         if (index === 0) {
                             indicator = parentWords[0].indicator;
+
                         } else if (parentWords.length > 1) {
+
+                            // Not first letter, look for next parentWord's indicator
                             for (let i = 1, len = parentWords.length; i < len; i++) {
                                 const newIndex = Grid.getIndexFromPositionInWord(position, parentWords[i]);
                                 if (newIndex === 0) {

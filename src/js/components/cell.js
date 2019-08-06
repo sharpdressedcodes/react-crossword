@@ -9,11 +9,11 @@ import { positionPropType } from '../constants/grid';
 class Cell extends Component {
     static displayName = 'Cell';
 
-    static LETTER_DEFAULT = '+';
+    static LETTER_DEFAULT = '+'; // Used as a fallback
 
-    static LETTER_ACTIVE = '-';
+    static LETTER_ACTIVE = '-'; // Used as a fallback
 
-    static RX_INPUT = /^[a-z+]$/i;
+    static RX_INPUT = /^[a-z+]$/i; // Used as a fallback
 
     static propTypes = {
         position: PropTypes.shape(positionPropType).isRequired,
