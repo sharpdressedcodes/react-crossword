@@ -3,3 +3,7 @@ dist
 node_modules
 bundle.css
 bundle.js
+tests/unit/coverage
+tests/unit/**/__snapshots__
+tests/functional/cypress/screenshots
+tests/functional/cypress/videos
