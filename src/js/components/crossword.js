@@ -59,7 +59,8 @@ class Crossword extends Component {
                             }}
                             off={{
                                 text: 'Hide correct answer',
-                                clickHandler: this.onHideAnswerClick
+                                clickHandler: this.onHideAnswerClick,
+                                className: 'crossword-toggle-button'
                             }}
                         />
                     </div>

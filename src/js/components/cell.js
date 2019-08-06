@@ -33,9 +33,9 @@ class Cell extends Component {
     };
 
     static contextTypes = {
-        config: PropTypes.object.isRequired,
-        executeAction: PropTypes.func.isRequired,
-        getStore: PropTypes.func.isRequired
+        config: PropTypes.object,
+        executeAction: PropTypes.func,
+        getStore: PropTypes.func
     };
 
     constructor(props, context) {
@@ -60,20 +60,21 @@ class Cell extends Component {
     };
 
     onInput = event => {
+        let { value } = event.target;
         const payload = {
             position: this.props.position,
             letter: null
         };
 
         // Give the user the ability to update their input
-        if (this.input.value.length > 0) {
-            this.input.value = this.input.value.substr(-1);
+        if (value.length > 0) {
+            value = value.substr(-1);
         }
 
-        if (this.input.value && this.regex.test(this.input.value)) {
-            this.input.value = this.input.value.toUpperCase();
-            this.setState({ typedLetter: this.input.value });
-            this.context.executeAction(cellTyped, { ...payload, letter: this.input.value });
+        if (value && this.regex.test(value)) {
+            value = value.toUpperCase();
+            this.setState({ typedLetter: value });
+            this.context.executeAction(cellTyped, { ...payload, letter: value });
         } else {
             this.input.value = '';
             this.setState({ typedLetter: null });
@@ -165,13 +166,9 @@ class Cell extends Component {
         const { phase, typedLetter } = this.state;
         const letter = this.props.letter === null ? this.letterDefault : this.letterActive;
         const clickHandler = this.props.letter === null ? null : this.onCellClick;
-        const classNames = [];
+        const classNames = [clickHandler ? 'loaded' : 'empty'];
         let indicator = null;
         let el = null;
-
-        if (!clickHandler) {
-            classNames.push('empty');
-        }
 
         if (typedLetter) {
             classNames.push('filled');
@@ -232,3 +229,5 @@ const ConnectedCell = connectToStores(Cell, ['AppStore'], context => {
 });
 
 export default ConnectedCell;
+
+export const DisconnectedCell = Cell;
