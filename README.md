@@ -18,6 +18,9 @@ npm run start
 
 Now open [http://127.0.0.1:3001/](http://127.0.0.1:3001/) in your browser.
 
+### Data
+There are 2 data files located inside `./data`. You can switch between them by modifying the configuration inside `./src/js/config/main.js`. Remember to rebuild the project after switching.
+
 ### Tests
 #### Unit
 Jest and Enzyme are being used in this project. The test files are located in `./tests/unit/components`
