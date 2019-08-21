@@ -42,11 +42,11 @@ export default [
         endY: 13
     },
     {
-        question: 'A powerful set of tools that makes it easy to create, manage, and score engaging online assessments.',
-        answer: 'LEARNOSITY',
+        question: 'The acquisition of knowledge or skills through study, experience, or being taught.',
+        answer: 'LEARNING',
         startX: 0,
         startY: 5,
-        endX: 9,
+        endX: 7,
         endY: 5
     },
     {
