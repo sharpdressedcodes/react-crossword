@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connectToStores } from 'fluxible-addons-react';
 import get from 'lodash/get';
-import { cellClicked, cellTyped } from '../actions/cell';
+import { cellClicked, cellTyped, cellNavigated } from '../actions/cell';
 import { PhaseTypes } from '../constants/cell';
 import { positionPropType } from '../constants/grid';
 
@@ -72,14 +72,42 @@ class Cell extends Component {
         }
 
         if (value && this.regex.test(value)) {
-            value = value.toUpperCase();
-            this.setState({ typedLetter: value });
-            this.context.executeAction(cellTyped, { ...payload, letter: value });
+            payload.letter = value.toUpperCase();
         } else {
             this.input.value = '';
-            this.setState({ typedLetter: null });
-            this.context.executeAction(cellTyped, payload);
         }
+
+        this.setState({ typedLetter: payload.letter });
+        this.context.executeAction(cellTyped, payload);
+    };
+
+    /**
+     * Let the user navigate to next/previous questions with arrow keys or tab or shift + tab or enter
+     *
+     * @param event
+     */
+    onKeyDown = event => {
+        let desiredDirection = null;
+
+        switch (event.keyCode) {
+            case 9: // Tab
+                desiredDirection = event.shiftKey ? 'prev' : 'next';
+                break;
+            case 13: // Enter
+            case 39: // ArrowRight
+            case 40: // ArrowDown
+                desiredDirection = 'next';
+                break;
+            case 37: // ArrowLeft
+            case 38: // ArrowUp
+                desiredDirection = 'prev';
+                break;
+            default:
+                return;
+        }
+
+        event.preventDefault();
+        this.context.executeAction(cellNavigated, { ...this.props, desiredDirection });
     };
 
     componentWillReceiveProps(nextProps) {
@@ -123,7 +151,10 @@ class Cell extends Component {
 
     componentDidUpdate(prevProps) {
         if (this.state.phase === PhaseTypes.INPUT) {
+            this.input.addEventListener('keydown', this.onKeyDown, false);
             this.input.focus();
+        } else if (this.prevState && this.prevState.phase === PhaseTypes.INPUT) {
+            this.input.removeEventListener('keydown', this.onKeyDown);
         }
     }
 
@@ -164,7 +195,8 @@ class Cell extends Component {
 
     render() {
         const { phase, typedLetter } = this.state;
-        const letter = this.props.letter === null ? this.letterDefault : this.letterActive;
+        // const letter = this.props.letter === null ? this.letterDefault : this.letterActive;
+        const letter = String.fromCharCode(160);
         const clickHandler = this.props.letter === null ? null : this.onCellClick;
         const classNames = [clickHandler ? 'loaded' : 'empty'];
         let indicator = null;

@@ -9,4 +9,8 @@
     &:not(:first-child) {
         margin-top: 15px;
     }
+
+    &.active {
+        outline: 1px dotted $color-question-border;
+    }
 }

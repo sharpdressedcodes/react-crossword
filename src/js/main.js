@@ -25,7 +25,9 @@ import config from './config/main';
         app.plug(fluxibleConfigPlugin(config));
         const context = app.createContext();
         const element = createElementWithContext(context);
-        render(element, root);
+        render(element, root, () => {
+            root.style.opacity = 1;
+        });
     };
 
     win.addEventListener('load', onLoad, false);

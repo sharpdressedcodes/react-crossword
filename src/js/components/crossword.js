@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { connectToStores } from 'fluxible-addons-react';
 import Grid from './grid';
 import Question from './question';
 import Button from './button';
@@ -13,16 +14,23 @@ class Crossword extends Component {
     static propTypes = {
         words: PropTypes.arrayOf(PropTypes.shape(wordPropType)).isRequired,
         maxGridWidth: PropTypes.number.isRequired,
-        maxGridHeight: PropTypes.number.isRequired
+        maxGridHeight: PropTypes.number.isRequired,
+        currentWords: PropTypes.arrayOf(PropTypes.shape(wordPropType))
     };
 
     static contextTypes = {
-        executeAction: PropTypes.func.isRequired
+        executeAction: PropTypes.func,
+        getStore: PropTypes.func
+    };
+
+    static defaultProps = {
+        currentWords: []
     };
 
     shouldComponentUpdate(nextProps, nextState) {
         const wordsChanged = nextProps.words !== this.props.words;
-        return wordsChanged;
+        const currentWordsChanged = nextProps.currentWords !== this.props.currentWords;
+        return wordsChanged || currentWordsChanged;
     }
 
     onValidateClick = event => {
@@ -39,10 +47,11 @@ class Crossword extends Component {
 
     render() {
         // console.log('Crossword::render');
-        const { words, maxGridWidth, maxGridHeight } = this.props;
+        const { words, maxGridWidth, maxGridHeight, currentWords } = this.props;
         const questions = words.map((word, index) => {
             const key = `question-${index}`;
-            return <Question question={word.question} index={word.indicator} key={key} />;
+            const className = currentWords.length > 0 && currentWords.includes(word) ? 'active' : '';
+            return <Question question={word.question} index={word.indicator} className={className} key={key} />;
         });
 
         return (
@@ -71,4 +80,13 @@ class Crossword extends Component {
     }
 }
 
-export default Crossword;
+const ConnectedCrossword = connectToStores(Crossword, ['AppStore'], context => {
+    const appStore = context.getStore('AppStore');
+    const currentWords = appStore.getCurrentWords();
+    return {
+        currentWords
+    };
+});
+
+export default ConnectedCrossword;
+export const DisconnectedCrossword = Crossword;

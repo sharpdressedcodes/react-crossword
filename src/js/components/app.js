@@ -2,7 +2,7 @@ import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import get from 'lodash/get';
 import Crossword from './crossword';
-import { appLoaded } from '../actions/app';
+import { appLoaded, appRendered } from '../actions/app';
 
 class App extends Component {
     static displayName = 'App';
@@ -16,8 +16,8 @@ class App extends Component {
     };
 
     static contextTypes = {
-        config: PropTypes.object.isRequired,
-        executeAction: PropTypes.func.isRequired
+        config: PropTypes.object,
+        executeAction: PropTypes.func
     };
 
     constructor(props, context) {
@@ -27,12 +27,11 @@ class App extends Component {
         this.maxGridWidth = get(config, 'app.maxGridWidth', 15);
         this.maxGridHeight = get(config, 'app.maxGridHeight', 15);
         this.maxWords = get(config, 'app.maxWords', 10);
-        this.words = get(config, 'app.words', []);
+        this.words = App.parseWords(get(config, 'app.words', []).slice(0, this.maxWords));
 
         context.executeAction(appLoaded, {
             maxGridWidth: this.maxGridWidth,
             maxGridHeight: this.maxGridHeight,
-            maxWords: this.maxWords,
             words: this.words
         });
     }
@@ -78,6 +77,10 @@ class App extends Component {
         return words;
     }
 
+    componentDidMount() {
+        this.context.executeAction(appRendered, {});
+    }
+
     componentWillReceiveProps(nextProps) {
         if (nextProps.validatedWords !== this.props.validatedWords && nextProps.validatedWords.length > 0) {
             nextProps.validatedWords.forEach(word => {
@@ -97,11 +100,7 @@ class App extends Component {
         return (
             <Fragment>
                 <h1>Crossword</h1>
-                <Crossword
-                    words={App.parseWords(this.words.slice(0, this.maxWords))}
-                    maxGridWidth={this.maxGridWidth}
-                    maxGridHeight={this.maxGridHeight}
-                />
+                <Crossword words={this.words} maxGridWidth={this.maxGridWidth} maxGridHeight={this.maxGridHeight} />
             </Fragment>
         );
     }

@@ -3,10 +3,11 @@ import CellActionTypes from '../constants/cell';
 import GridActionTypes, { DirectionTypes } from '../constants/grid';
 import CrosswordActionTypes from '../constants/crossword';
 import AppActionTypes from '../constants/app';
-const { CELL_CLICKED, CELL_TYPED } = CellActionTypes;
+const { CELL_CLICKED, CELL_TYPED, CELL_NAVIGATED } = CellActionTypes;
 const { ADD_INPUT_CELL } = GridActionTypes;
 const { TOGGLE_SHOW_CORRECT_ANSWER, VALIDATE_CELLS } = CrosswordActionTypes;
-const { APP_LOADED } = AppActionTypes;
+const { APP_LOADED, APP_RENDERED } = AppActionTypes;
+import { getLetterFromPosition } from '../helpers/crossword';
 
 class AppStore extends BaseStore {
     static storeName = 'AppStore';
@@ -26,6 +27,8 @@ class AppStore extends BaseStore {
         this.maxGridWidth = 0;
         this.maxGridHeight = 0;
         this.validatedWords = [];
+        this.words = [];
+        this.currentWords = [];
     }
 
     // Getters
@@ -40,7 +43,9 @@ class AppStore extends BaseStore {
             direction: this.direction,
             maxGridWidth: this.maxGridWidth,
             maxGridHeight: this.maxGridHeight,
-            validatedWords: this.validatedWords
+            validatedWords: this.validatedWords,
+            words: this.words,
+            currentWords: this.currentWords
         };
     }
 
@@ -63,6 +68,10 @@ class AppStore extends BaseStore {
     getMaxGridWidth = () => this.maxGridWidth;
 
     getMaxGridHeight = () => this.maxGridHeight;
+
+    getWords = () => this.words;
+
+    getCurrentWords = () => this.currentWords;
 
     // Methods
     /**
@@ -239,19 +248,87 @@ class AppStore extends BaseStore {
     onAppLoaded = payload => {
         this.maxGridWidth = payload.maxGridWidth;
         this.maxGridHeight = payload.maxGridHeight;
+        this.words = payload.words;
+        this.currentWords = [];
+    };
+
+    onAppRendered = payload => {
+        // Automatically select the first question/answer.
+        const word = this.words[0];
+        this.nextPosition = { x: word.startX, y: word.startY };
+        this.emitChange();
     };
 
     onCellClicked = payload => {
         this.position = payload.position;
+        const letter = getLetterFromPosition(this.position.x, this.position.y, this.words, this.words.length, true);
+        this.currentWords = letter.index === null ? [] : letter.parentWords;
         this.emitChange();
     };
 
     onCellTyped = payload => {
         this.updateTypedLetter(payload.position, payload.letter);
+        this.currentWords = this.lastTypedLetter.parentWords;
+
         if (payload.letter) {
             this.nextPosition = this.guessNextPosition(payload.position);
+            if (this.nextPosition) {
+                const letter = getLetterFromPosition(this.nextPosition.x, this.nextPosition.y, this.words, this.words.length, true);
+                this.currentWords = letter.parentWords;
+            }
         }
+
         this.emitChange();
+    };
+
+    onCellNavigated = payload => {
+        const length = this.words.length;
+        const letter = getLetterFromPosition(payload.position.x, payload.position.y, this.words, length, true);
+        const currentWord = this.words[letter.wordIndex];
+        let newIndex = null;
+        let word = null;
+
+        switch (payload.desiredDirection) {
+            case 'next':
+                // Are we at the start of the word?
+                if (payload.indicator) {
+                    newIndex = payload.indicator + 1 < length ? payload.indicator + 1 : 0;
+                } else {
+                    newIndex = letter.wordIndex + 1 < length ? letter.wordIndex + 1 : 0;
+                }
+                word = this.words[newIndex];
+                while (word.indicator === currentWord.indicator) {
+                    newIndex++;
+                    if (newIndex > length - 1) {
+                        newIndex = 0;
+                    }
+                    word = this.words[newIndex];
+                }
+                break;
+            case 'prev':
+            default:
+                // Are we at the start of the word?
+                if (payload.indicator) {
+                    newIndex = payload.indicator - 1 > -1 ? payload.indicator - 1 : length - 1;
+                } else {
+                    newIndex = letter.wordIndex - 1 > -1 ? letter.wordIndex - 1 : length - 1;
+                }
+                word = this.words[newIndex];
+                while (word.indicator === currentWord.indicator) {
+                    newIndex--;
+                    if (newIndex < 0) {
+                        newIndex = length - 1;
+                    }
+                    word = this.words[newIndex];
+                }
+        }
+
+        if (newIndex !== null && newIndex > -1) {
+            const newLetter = getLetterFromPosition(word.startX, word.startY, this.words, length, true);
+            this.currentWords = newLetter.parentWords;
+            this.nextPosition = { x: word.startX, y: word.startY };
+            this.emitChange();
+        }
     };
 
     onToggleShowCorrectAnswer = payload => {
@@ -292,12 +369,16 @@ class AppStore extends BaseStore {
         this.maxGridWidth = state.maxGridWidth;
         this.maxGridHeight = state.maxGridHeight;
         this.validatedWords = state.validatedWords;
+        this.words = state.words;
+        this.currentWords = state.currentWords;
     }
 }
 
 AppStore.handlers[APP_LOADED] = 'onAppLoaded';
+AppStore.handlers[APP_RENDERED] = 'onAppRendered';
 AppStore.handlers[CELL_CLICKED] = 'onCellClicked';
 AppStore.handlers[CELL_TYPED] = 'onCellTyped';
+AppStore.handlers[CELL_NAVIGATED] = 'onCellNavigated';
 AppStore.handlers[ADD_INPUT_CELL] = 'onAddInputCell';
 AppStore.handlers[TOGGLE_SHOW_CORRECT_ANSWER] = 'onToggleShowCorrectAnswer';
 AppStore.handlers[VALIDATE_CELLS] = 'onValidateCells';

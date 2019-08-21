@@ -7,3 +7,6 @@ export function cellClicked(context, payload) {
 export function cellTyped(context, payload) {
     context.dispatch(ActionTypes.CELL_TYPED, payload);
 }
+export function cellNavigated(context, payload) {
+    context.dispatch(ActionTypes.CELL_NAVIGATED, payload);
+}

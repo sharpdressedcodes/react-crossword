@@ -2,7 +2,8 @@ import keyMirror from 'keymirror';
 
 const ActionTypes = keyMirror({
     CELL_CLICKED: null,
-    CELL_TYPED: null
+    CELL_TYPED: null,
+    CELL_NAVIGATED: null
 });
 
 export const PhaseTypes = keyMirror({

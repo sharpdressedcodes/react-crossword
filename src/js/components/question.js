@@ -6,21 +6,26 @@ class Question extends Component {
 
     static propTypes = {
         question: PropTypes.string.isRequired,
-        index: PropTypes.number
+        index: PropTypes.number,
+        className: PropTypes.string
     };
 
     static defaultProps = {
-        index: null
+        index: null,
+        className: ''
     };
 
-    shouldComponentUpdate = () => false;
+    shouldComponentUpdate(nextProps, nextState) {
+        const classNameChanged = nextProps.className !== this.props.className;
+        return classNameChanged;
+    }
 
     render() {
-        const { question, index } = this.props;
+        const { question, index, className } = this.props;
         const indexElement = index === null ? null : <span className="crossword-question--index">{index}</span>;
 
         return (
-            <div className="crossword-question">
+            <div className={`crossword-question ${className}`.trim()}>
                 {indexElement}
                 <span className="crossword-question--text">{question}</span>
             </div>
