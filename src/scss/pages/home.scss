@@ -1,0 +1,17 @@
+@import '../components/crossword';
+
+#app {
+    opacity: 0;
+    margin: 0 auto 50px;
+    width: $container-width-mobile;
+    transition: opacity $default-page-transition-speed ease-in-out;
+
+    @include breakpoint(medium up) {
+        width: $container-width;
+        max-width: $container-max-width;
+    }
+
+    h1 {
+        text-align: center;
+    }
+}

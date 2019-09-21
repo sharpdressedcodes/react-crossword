@@ -1,0 +1,10 @@
+{
+    "baseUrl": "http://127.0.0.1:3001/",
+    "testFiles": "**/*spec.js",
+    "fixturesFolder": "./tests/functional/cypress/fixtures",
+    "integrationFolder": "./tests/functional/cypress/integration",
+    "pluginsFile": "./tests/functional/cypress/plugins/index.js",
+    "screenshotsFolder": "./tests/functional/cypress/screenshots",
+    "videosFolder": "./tests/functional/cypress/videos",
+    "supportFile": "./tests/functional/cypress/support/index.js"
+}
